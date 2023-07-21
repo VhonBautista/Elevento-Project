@@ -6,6 +6,7 @@ use App\Http\Controllers\Controller;
 use App\Providers\RouteServiceProvider;
 use Illuminate\Foundation\Auth\AuthenticatesUsers;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Auth;
 
 class LoginController extends Controller
 {
@@ -40,16 +41,23 @@ class LoginController extends Controller
     }
 
     public function login(Request $request){
-        $input = $request->all();
+        $input = $request->only('email_or_user_id', 'password');
 
         $this->validate($request, [
-            'email' => 'required|email',
-            'password' => 'required',
+            'email_or_user_id' => ['required', 'string', 'max:255'],
+            'password' => ['required', 'string', 'min:8'],
         ]);
-
-        if (auth()->attempt(array('email' => $input['email'], 'password' => $input['password']))){
-            $user_type = auth()->user()->role;
     
+        $credentials = [];
+    
+        if (filter_var($input['email_or_user_id'], FILTER_VALIDATE_EMAIL)) {
+            $credentials['email'] = $input['email_or_user_id'];
+        } else {
+            $credentials['user_id'] = $input['email_or_user_id'];
+        }
+    
+        if (Auth::attempt(array_merge($credentials, ['password' => $input['password']]))) {
+            $user_type = Auth::user()->role;
             switch ($user_type) {
                 case 'admin':
                 case 'co_admin':
@@ -57,12 +65,12 @@ class LoginController extends Controller
                 case 'organizer':
                     return redirect()->route('organizer.home');
                 case 'attendee':
-                    return redirect()->route('home');
+                    return redirect()->route('attendee.home');
                 default:
                     abort(401);
             }
         } else {
-            return redirect()->route('login')->with('error', 'Incorrect email and/or password.');
+            return redirect()->route('login')->with('error-login', 'Incorrect email/user_id and/or password.');
         }
     }
 }

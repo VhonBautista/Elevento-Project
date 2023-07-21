@@ -1,5 +1,13 @@
 @extends('layouts.app')
 
+@section('nav-links')
+    @if (Route::has('register'))
+        <li class="nav-item">
+            <a class="nav-link" href="{{ route('register') }}">{{ __('Sign Up as Event Organizer') }}</a>
+        </li>
+    @endif
+@endsection
+
 @section('content')
 <div class="container">
     <div class="row justify-content-center">

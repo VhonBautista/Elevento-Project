@@ -16,40 +16,37 @@
             <img class="front-img" src="asset/background_blue.png" alt="">
             <div class="text">
                 <img src="asset/elevento_logo_white.png" width="320px" alt=""><br>
-                <span class="text-1">Take your events to <br> the next level with our <br> optimization tools</span>
-                <span class="text-2">Elevate your event game!</span>
+                <span class="text-1">{{ __('Take your events to ') }}<br> {{ __('the next level with our ') }}<br> {{ __('optimization tools') }}</span>
+                <span class="text-2">{{ __('Elevate your event game!') }}</span>
             </div>
         </div>
         <div class="back">
             <img class="back-img" src="asset/background_blue.png" alt="">
             <div class="text">
                 <img src="asset/elevento_logo_white.png" width="320px" alt=""><br>
-                <span class="text-1">Take your events to <br> new heights with our <br> optimization app</span>
+                <span class="text-1">{{ __('Take your events to ') }}<br> {{ __('new heights with our ') }}<br> {{ __('optimization app') }}</span>
             </div>
         </div>
     </div>
     <div class="forms">
         <div class="form-content">
             <div class="login-form">
-                <div class="title">Login</div>
+                <div class="title">{{ __('Login') }}</div>
                     <form method="POST" action="{{ route('login') }}">
                         @csrf
                         
                         <div class="input-boxes">
                             @if(session('error'))
                                 <div class="alert alert-danger alert-dismissible fade m-0 show" role="alert">
-                                    {{ session('error') }}
-                                    <button type="button" class="close" data-dismiss="alert" aria-label="Close">
-                                    <span aria-hidden="true">&times;</span>
-                                    </button>
+                                    {{ session('error-login') }}
                                 </div>
                             @endif
 
                             <div class="input-box">
-                                <i class="fas fa-envelope"></i>
-                                <input id="email" type="email" placeholder="{{ __('Enter email address') }}" class="@error('email') is-invalid @enderror" name="email" value="{{ old('email') }}" required autocomplete="email" autofocus>
+                                <i class="fas fa-user"></i>
+                                <input id="email" type="text" placeholder="{{ __('Enter email or ID number') }}" class="@error('email_or_user_id') is-invalid @enderror" name="email_or_user_id" value="{{ old('email_or_user_id') }}" required autocomplete="email" autofocus>
                             </div>
-                            @error('email')
+                            @error('email_or_user_id')
                                 <span class="invalid-feedback" role="alert">
                                     <strong>{{ $message }}</strong>
                                 </span>
@@ -57,7 +54,7 @@
 
                             <div class="input-box">
                                 <i class="fas fa-lock"></i>
-                                <input id="password" type="password" class="@error('password') is-invalid @enderror" name="password" required autocomplete="current-password" placeholder="Enter password">
+                                <input id="password" type="password" class="@error('password') is-invalid @enderror" name="password" required autocomplete="current-password" placeholder="{{ __('Enter password') }}">
                             </div>
                             @error('password')
                                 <span class="invalid-feedback" role="alert">
@@ -86,30 +83,62 @@
                                 <input type="submit" value="{{ __('Login') }}">
                             </div>
 
-                            <div class="text sign-up-text">Don't have an account? <label for="flip">{{ __('Sign Up') }}</label></div>
+                            <div class="text sign-up-text">{{ __('Don\'t have an account? ') }}<label for="flip">{{ __('Sign Up') }}</label></div>
                         </div>
                     </form>
                 </div> 
             <div class="signup-form">
                 <div class="title">{{ __('Sign Up as Attendee') }}</div>
-                    <form action="#">
+                    <form method="POST" action="{{ route('register') }}">
+                        @csrf
+
                         <div class="input-boxes">
+                            @if(session('error'))
+                                <div class="alert alert-danger alert-dismissible fade m-0 show" role="alert">
+                                    {{ session('error-register') }}
+                                </div>
+                            @endif
+
                             <div class="input-box">
                                 <i class="fas fa-user"></i>
-                                <input type="text" placeholder="Enter your name" required>
+                                <input id="user-id" type="text" placeholder="{{ __('Enter ID number') }}" class="@error('user_id') is-invalid @enderror" name="user_id" value="{{ old('user_id') }}" required autocomplete="name" autofocus>
                             </div>
+                            @error('user_id')
+                                <span class="invalid-feedback" role="alert">
+                                    <strong>{{ $message }}</strong>
+                                </span>
+                            @enderror
+
                             <div class="input-box">
                                 <i class="fas fa-envelope"></i>
-                                <input type="text" placeholder="Enter your email" required>
+                                <input id="email" type="email" placeholder="{{ __('Enter email address') }}" class="@error('email') is-invalid @enderror" name="email" value="{{ old('email') }}" required autocomplete="email" autofocus>
                             </div>
+                            @error('email')
+                                <span class="invalid-feedback" role="alert">
+                                    <strong>{{ $message }}</strong>
+                                </span>
+                            @enderror
+
                             <div class="input-box">
                                 <i class="fas fa-lock"></i>
-                                <input type="password" placeholder="Enter your password" required>
+                                <input id="password" type="password" class="@error('password') is-invalid @enderror" name="password" required autocomplete="current-password" placeholder="{{ __('Enter password') }}">
                             </div>
+                            
+                            <div class="input-box">
+                                <i class="fas fa-lock"></i>
+                                <input id="password-confirm" type="password" class="@error('password_confirmation') is-invalid @enderror" name="password_confirmation" required autocomplete="new-password" placeholder="{{ __('Confirm password') }}">
+                            </div>
+                            @error('password')
+                                <span class="invalid-feedback" role="alert">
+                                    <strong>{{ $message }}</strong>
+                                </span>
+                            @enderror
+                            
                             <div class="button input-box">
                                 <input type="submit" value="{{ __('Register') }}">
                             </div>
-                            <div class="text sign-up-text">Already have an account? <label for="flip">{{ __('Login') }}</label></div>
+
+                            <div class="text sign-up-text">{{ __('Already have an account? ') }}<label for="flip">{{ __('Login') }}</label></div>
                         </div>
                     </form>
                 </div>

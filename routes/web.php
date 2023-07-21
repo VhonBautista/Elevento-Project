@@ -33,5 +33,5 @@ Route::middleware(['auth', 'user-access:organizer'])->group(function (){
 });
 
 Route::middleware(['auth', 'user-access:attendee'])->group(function (){
-    Route::get('/home', [HomeController::class, 'index'])->name('home');
+    Route::get('/home', [HomeController::class, 'attendeeHome'])->name('attendee.home');
 });
