@@ -17,17 +17,17 @@ class HomeController extends Controller
     }
 
     /**
-     * Show the application dashboard.
+     * Show the attendee dashboard.
      *
      * @return \Illuminate\Contracts\Support\Renderable
      */
-    public function index()
+    public function attendeeHome()
     {
         return view('user_attendee.home');
     }
 
     /**
-     * Show the application dashboard.
+     * Show the organizer dashboard.
      *
      * @return \Illuminate\Contracts\Support\Renderable
      */
@@ -37,7 +37,7 @@ class HomeController extends Controller
     }
 
     /**
-     * Show the application dashboard.
+     * Show the admin dashboard.
      *
      * @return \Illuminate\Contracts\Support\Renderable
      */
