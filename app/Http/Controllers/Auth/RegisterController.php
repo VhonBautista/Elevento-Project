@@ -5,6 +5,7 @@ namespace App\Http\Controllers\Auth;
 use App\Http\Controllers\Controller;
 use App\Providers\RouteServiceProvider;
 use App\Models\User;
+use App\Models\CampusEntity;
 use Illuminate\Foundation\Auth\RegistersUsers;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\Validator;
@@ -52,6 +53,8 @@ class RegisterController extends Controller
         return Validator::make($data, [
             'email' => ['required', 'string', 'email', 'max:255', 'unique:users'],
             'password' => ['required', 'string', 'min:8', 'confirmed'],
+            'g-recaptcha-response' => ['required', 'captcha'],
+            'terms' => ['required'],
         ]);
     }
 
@@ -64,7 +67,7 @@ class RegisterController extends Controller
     protected function create(array $data)
     {
         return User::create([
-            'user_id' => '20UR0002',
+            'user_id' => '20UR0003',
             'username' => 'firstname',
             'email' => $data['email'],
             'password' => Hash::make($data['password']),

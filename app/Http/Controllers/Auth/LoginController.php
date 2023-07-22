@@ -41,19 +41,19 @@ class LoginController extends Controller
     }
 
     public function login(Request $request){
-        $input = $request->only('email_or_user_id', 'password');
+        $input = $request->only('email-or-user-id', 'password');
 
         $this->validate($request, [
-            'email_or_user_id' => ['required', 'string', 'max:255'],
+            'email-or-user-id' => ['required', 'string', 'max:255'],
             'password' => ['required', 'string', 'min:8'],
         ]);
     
         $credentials = [];
     
-        if (filter_var($input['email_or_user_id'], FILTER_VALIDATE_EMAIL)) {
-            $credentials['email'] = $input['email_or_user_id'];
+        if (filter_var($input['email-or-user-id'], FILTER_VALIDATE_EMAIL)) {
+            $credentials['email'] = $input['email-or-user-id'];
         } else {
-            $credentials['user_id'] = $input['email_or_user_id'];
+            $credentials['user_id'] = $input['email-or-user-id'];
         }
     
         if (Auth::attempt(array_merge($credentials, ['password' => $input['password']]))) {

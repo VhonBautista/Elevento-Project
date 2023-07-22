@@ -36,28 +36,28 @@
                         @csrf
                         
                         <div class="input-boxes">
-                            @if(session('error'))
+                            @if(session('alert'))
                                 <div class="alert alert-danger alert-dismissible fade m-0 show" role="alert">
-                                    {{ session('error-login') }}
+                                    {{ session('alert') }}
                                 </div>
                             @endif
 
                             <div class="input-box">
                                 <i class="fas fa-user"></i>
-                                <input id="email" type="text" placeholder="{{ __('Enter email or ID number') }}" class="@error('email_or_user_id') is-invalid @enderror" name="email_or_user_id" value="{{ old('email_or_user_id') }}" required autocomplete="email" autofocus>
+                                <input id="email-login" type="text" placeholder="{{ __('Enter email or ID number') }}" class="@error('email-or-user-id') is-invalid @enderror" name="email-or-user-id" value="{{ old('email-or-user-id') }}" required autocomplete="email" autofocus>
                             </div>
-                            @error('email_or_user_id')
-                                <span class="invalid-feedback" role="alert">
+                            @error('email-or-user-id')
+                                <span class="text-danger" role="alert">
                                     <strong>{{ $message }}</strong>
                                 </span>
                             @enderror
 
                             <div class="input-box">
                                 <i class="fas fa-lock"></i>
-                                <input id="password" type="password" class="@error('password') is-invalid @enderror" name="password" required autocomplete="current-password" placeholder="{{ __('Enter password') }}">
+                                <input id="password-login" type="password" class="@error('password') is-invalid @enderror" name="password" required autocomplete="current-password" placeholder="{{ __('Enter password') }}">
                             </div>
                             @error('password')
-                                <span class="invalid-feedback" role="alert">
+                                <span class="text-danger" role="alert">
                                     <strong>{{ $message }}</strong>
                                 </span>
                             @enderror
@@ -93,35 +93,40 @@
                         @csrf
 
                         <div class="input-boxes">
-                            @if(session('error'))
+                            @if(session('error-register'))
                                 <div class="alert alert-danger alert-dismissible fade m-0 show" role="alert">
                                     {{ session('error-register') }}
                                 </div>
                             @endif
 
-                            <div class="input-box">
-                                <i class="fas fa-user"></i>
-                                <input id="user-id" type="text" placeholder="{{ __('Enter ID number') }}" class="@error('user_id') is-invalid @enderror" name="user_id" value="{{ old('user_id') }}" required autocomplete="name" autofocus>
+                            <div class="row g-4">
+                                <div class="col-md-6">
+                                    <div class="input-box">
+                                        <i class="fas fa-user"></i>
+                                        <input id="user-id" type="text" placeholder="{{ __('Enter ID number') }}" class="@error('user-id') is-invalid @enderror" name="user-id" value="{{ old('user-id') }}" required autocomplete="name" autofocus>
+                                    </div>
+                                    @error('user-id')
+                                        <span class="text-danger" role="alert">
+                                            <strong>{{ $message }}</strong>
+                                        </span>
+                                    @enderror
+                                </div>
+                                <div class="col-md-6">
+                                    <div class="input-box">
+                                        <i class="fas fa-envelope"></i>
+                                        <input id="email-register" type="email" placeholder="{{ __('Enter email') }}" class="@error('email') is-invalid @enderror" name="email" value="{{ old('email') }}" required autocomplete="email" autofocus>
+                                    </div>
+                                    @error('email')
+                                        <span class="text-danger" role="alert">
+                                            <strong>{{ $message }}</strong>
+                                        </span>
+                                    @enderror
+                                </div>
                             </div>
-                            @error('user_id')
-                                <span class="invalid-feedback" role="alert">
-                                    <strong>{{ $message }}</strong>
-                                </span>
-                            @enderror
-
-                            <div class="input-box">
-                                <i class="fas fa-envelope"></i>
-                                <input id="email" type="email" placeholder="{{ __('Enter email address') }}" class="@error('email') is-invalid @enderror" name="email" value="{{ old('email') }}" required autocomplete="email" autofocus>
-                            </div>
-                            @error('email')
-                                <span class="invalid-feedback" role="alert">
-                                    <strong>{{ $message }}</strong>
-                                </span>
-                            @enderror
 
                             <div class="input-box">
                                 <i class="fas fa-lock"></i>
-                                <input id="password" type="password" class="@error('password') is-invalid @enderror" name="password" required autocomplete="current-password" placeholder="{{ __('Enter password') }}">
+                                <input id="password-register" type="password" class="@error('password') is-invalid @enderror" name="password" required autocomplete="current-password" placeholder="{{ __('Enter password') }}">
                             </div>
                             
                             <div class="input-box">
@@ -129,10 +134,27 @@
                                 <input id="password-confirm" type="password" class="@error('password_confirmation') is-invalid @enderror" name="password_confirmation" required autocomplete="new-password" placeholder="{{ __('Confirm password') }}">
                             </div>
                             @error('password')
-                                <span class="invalid-feedback" role="alert">
+                                <span class="text-danger" role="alert">
                                     <strong>{{ $message }}</strong>
                                 </span>
                             @enderror
+
+                            <div class="mt-4">
+                                {!! NoCaptcha::renderJs() !!}
+                                {!! NoCaptcha::display() !!}
+                            </div>
+                            @error('g-recaptcha-response')
+                                <span class="text-danger" role="alert">
+                                    <strong>{{ $message }}</strong>
+                                </span>
+                            @enderror
+
+                            <div class="form-check mt-3">
+                                <input class="form-check-input" type="checkbox" name="terms" id="terms">
+                                <span class="form-check-label" for="remember">
+                                    {{ __('I Accept the ') }} <label><a href="#">{{ __('Terms and Conditions') }}</a></label>
+                                </span>
+                            </div>
                             
                             <div class="button input-box">
                                 <input type="submit" value="{{ __('Register') }}">
