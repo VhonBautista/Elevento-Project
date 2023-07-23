@@ -1,6 +1,7 @@
 <?php
 
 use App\Http\Controllers\HomeController;
+use App\Http\Controllers\Auth\RegisterController;
 use Illuminate\Support\Facades\Route;
 
 /*
@@ -19,6 +20,8 @@ Route::get('/', function () {
 });
 
 Auth::routes();
+
+Route::post('/register', [RegisterController::class, 'register'])->name('register-user');
 
 Route::middleware(['auth', 'user-access:admin'])->group(function (){
     Route::get('/admin/home', [HomeController::class, 'adminHome'])->name('admin.home');

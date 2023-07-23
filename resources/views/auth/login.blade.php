@@ -89,7 +89,7 @@
                 </div> 
             <div class="signup-form">
                 <div class="title">{{ __('Sign Up as Attendee') }}</div>
-                    <form method="POST" action="{{ route('register') }}">
+                    <form method="POST" action="{{ route('register-user') }}">
                         @csrf
 
                         <div class="input-boxes">
@@ -126,14 +126,14 @@
 
                             <div class="input-box">
                                 <i class="fas fa-lock"></i>
-                                <input id="password-register" type="password" class="@error('password') is-invalid @enderror" name="password" required autocomplete="current-password" placeholder="{{ __('Enter password') }}">
+                                <input id="password-register" type="password" class="@error('password') is-invalid @enderror" name="password-register" required autocomplete="current-password" placeholder="{{ __('Enter password') }}">
                             </div>
                             
                             <div class="input-box">
                                 <i class="fas fa-lock"></i>
                                 <input id="password-confirm" type="password" class="@error('password_confirmation') is-invalid @enderror" name="password_confirmation" required autocomplete="new-password" placeholder="{{ __('Confirm password') }}">
                             </div>
-                            @error('password')
+                            @error('password-register')
                                 <span class="text-danger" role="alert">
                                     <strong>{{ $message }}</strong>
                                 </span>
