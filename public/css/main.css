@@ -22,6 +22,7 @@
 }
 .form-container{
   max-width: 1000px;
+  margin: 42px 12px;
 }
 .form-container-2{
   max-width: 500px;
@@ -146,8 +147,7 @@
   border-bottom: 2px solid rgba(0,0,0,0.2);
   transition: all 0.3s ease;
 }
-.form-content .input-box input:focus,
-.form-content .input-box input:valid{
+.form-content .input-box input:focus{
   border-color: #2A93E8;
 }
 .form-content .input-box i{

@@ -28,7 +28,7 @@ Route::middleware(['auth', 'user-access:admin'])->group(function (){
 });
 
 Route::middleware(['auth', 'user-access:co_admin'])->group(function (){
-    Route::get('/admin/home', [HomeController::class, 'adminHome'])->name('admin.home');
+    Route::get('/co-admin/home', [HomeController::class, 'adminHome'])->name('co_admin.home');
 });
 
 Route::middleware(['auth', 'user-access:organizer'])->group(function (){

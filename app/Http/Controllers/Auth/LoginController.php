@@ -40,28 +40,22 @@ class LoginController extends Controller
         $this->middleware('guest')->except('logout');
     }
 
-    public function login(Request $request){
-        $input = $request->only('email-or-user-id', 'password');
-
-        $this->validate($request, [
-            'email-or-user-id' => ['required', 'string', 'max:255'],
-            'password' => ['required', 'string', 'min:8'],
-        ]);
-    
+    public function login(Request $data){
         $credentials = [];
     
-        if (filter_var($input['email-or-user-id'], FILTER_VALIDATE_EMAIL)) {
-            $credentials['email'] = $input['email-or-user-id'];
+        if (filter_var($data['email-or-user-id'], FILTER_VALIDATE_EMAIL)) {
+            $credentials['email'] = $data['email-or-user-id'];
         } else {
-            $credentials['user_id'] = $input['email-or-user-id'];
+            $credentials['user_id'] = $data['email-or-user-id'];
         }
     
-        if (Auth::attempt(array_merge($credentials, ['password' => $input['password']]))) {
+        if (Auth::attempt(array_merge($credentials, ['password' => $data['password']]))) {
             $user_type = Auth::user()->role;
             switch ($user_type) {
                 case 'admin':
-                case 'co_admin':
                     return redirect()->route('admin.home');
+                case 'co_admin':
+                    return redirect()->route('co_admin.home');
                 case 'organizer':
                     return redirect()->route('organizer.home');
                 case 'attendee':
@@ -70,7 +64,7 @@ class LoginController extends Controller
                     abort(401);
             }
         } else {
-            return redirect()->route('login')->with('error-login', 'Incorrect email/user_id and/or password.');
+            return redirect()->route('login')->with('error-login', 'Invalid credentials. Please double-check your email/user ID and password.');
         }
     }
 }

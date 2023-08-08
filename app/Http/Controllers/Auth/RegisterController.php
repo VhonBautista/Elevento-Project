@@ -44,33 +44,26 @@ class RegisterController extends Controller
         $this->middleware('guest');
     }
 
-    protected function register(Request $request)
+    protected function register(Request $data)
     {
-        $data = $request->validate([
-            'email' => ['required', 'string', 'email', 'max:255', 'unique:users'],
-            'password-register' => ['required', 'string', 'min:8', 'confirmed'],
-            'g-recaptcha-response' => ['required', 'captcha'],
-            'terms' => ['required'],
-            'user-id' => ['required', 'string', 'max:20',],
-        ], [
-            'password-register.confirmed' => 'Passwords does not match.',
-            'g-recaptcha-response.required' => 'Please complete the reCAPTCHA verification.',
-            'g-recaptcha-response.captcha' => 'The reCAPTCHA verification failed. Please try again.',
-            'terms.required' => 'You must accept the terms and conditions to register.',
-        ]);
-
         $inputUserId = strtoupper(trim($data['user-id']));
 
         $campusEntity = CampusEntity::where('user_id', $inputUserId)->first();
 
         if (!$campusEntity) {
-            return redirect()->back()->withInput($data)->with('error-register', 'Ensure that you belong to PSU and that your user ID is valid.');
+            return redirect()->back()->withInput($data->all())->with('error-register', 'Ensure that you belong to PSU and that your user ID is valid.');
         }
 
         $existingUser = User::where('user_id', $inputUserId)->first();
 
         if ($existingUser) {
-            return redirect()->back()->withInput($request->all())->with('error-register', 'User ID already has an existing account.');
+            return redirect()->back()->withInput($data->all())->with('error-register', 'User ID already has an existing account.');
+        }
+
+        $existingEmail = User::where('email', $data['email'])->first();
+
+        if ($existingEmail) {
+            return redirect()->back()->withInput($data->all())->with('error-register', 'Email has already been taken. Please choose a different one.');
         }
         
         $username = ucfirst(strtolower($campusEntity->firstname));

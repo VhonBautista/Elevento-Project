@@ -10,7 +10,7 @@
 
 @section('content')
 <div class="form-container">
-    <input type="checkbox" id="flip">
+    <input type="checkbox" name="flip" id="flip">
     <div class="cover">
         <div class="front">
             <img class="front-img" src="asset/background_blue.png" alt="">
@@ -32,36 +32,36 @@
         <div class="form-content">
             <div class="login-form">
                 <div class="title">{{ __('Login') }}</div>
-                    <form method="POST" action="{{ route('login') }}">
+                    <form method="POST" id="login-form" action="{{ route('login') }}">
                         @csrf
                         
                         <div class="input-boxes">
-                            @if(session('alert'))
-                                <div class="alert alert-danger alert-dismissible fade m-0 show" role="alert">
-                                    {{ session('alert') }}
+                            @if(session('error-login'))
+                                <div width="100%" class="alert alert-danger alert-dismissible fade m-0 show alert-box d-flex justify-content-between align-items-center p-4" role="alert">
+                                    <span style="padding-right: 16px;">
+                                        {{ session('error-login') }}
+                                    </span>
                                 </div>
                             @endif
 
                             <div class="input-box">
                                 <i class="fas fa-user"></i>
-                                <input id="email-login" type="text" placeholder="{{ __('Enter email or ID number') }}" class="@error('email-or-user-id') is-invalid @enderror" name="email-or-user-id" value="{{ old('email-or-user-id') }}" required autocomplete="email" autofocus>
+                                <input id="email-login" type="text" placeholder="{{ __('Enter email or ID number') }}" class="@error('email-or-user-id') is-invalid @enderror" name="email-or-user-id" value="{{ old('email-or-user-id') }}" autocomplete="email" autofocus required>
                             </div>
                             @error('email-or-user-id')
-                                <span class="text-danger" role="alert">
-                                    <strong>{{ $message }}</strong>
-                                </span>
+                                <span class="text-danger fw-bold small" role="alert">{{ $message }}</span>
                             @enderror
-
+                            <span id="email-login-error" class="text-danger fw-bold small"></span>
+                            
                             <div class="input-box">
                                 <i class="fas fa-lock"></i>
-                                <input id="password-login" type="password" class="@error('password') is-invalid @enderror" name="password" required autocomplete="current-password" placeholder="{{ __('Enter password') }}">
+                                <input id="password-login" type="password" class="@error('password') is-invalid @enderror" name="password"  autocomplete="current-password" placeholder="{{ __('Enter password') }}" required>
                             </div>
                             @error('password')
-                                <span class="text-danger" role="alert">
-                                    <strong>{{ $message }}</strong>
-                                </span>
+                                <span class="text-danger fw-bold small" role="alert">{{ $message }}</span>
                             @enderror
-
+                            <span id="password-login-error" class="text-danger fw-bold small"></span>
+                            
                             <div class="d-flex align-items-center justify-content-between w-100">
                                 <div class="form-check mr-3">
                                     <input class="form-check-input" type="checkbox" name="remember" id="remember" {{ old('remember') ? 'checked' : '' }}>
@@ -89,12 +89,12 @@
                 </div> 
             <div class="signup-form">
                 <div class="title">{{ __('Sign Up as Attendee') }}</div>
-                    <form method="POST" action="{{ route('register-user') }}">
+                    <form method="POST"  id="register-form" action="{{ route('register-user') }}">
                         @csrf
 
                         <div class="input-boxes">
                             @if(session('error-register'))
-                                <div class="alert alert-danger alert-dismissible fade m-0 show" role="alert">
+                                <div class="alert alert-danger alert-dismissible fade m-0 show alert-box" role="alert">
                                     {{ session('error-register') }}
                                 </div>
                             @endif
@@ -103,41 +103,45 @@
                                 <div class="col-md-6">
                                     <div class="input-box">
                                         <i class="fas fa-user"></i>
-                                        <input id="user-id" type="text" placeholder="{{ __('Enter ID number') }}" class="@error('user-id') is-invalid @enderror" name="user-id" value="{{ old('user-id') }}" required autocomplete="name" autofocus>
+                                        <input id="id-register" type="text" placeholder="{{ __('Enter ID number') }}" class="@error('user-id') is-invalid @enderror" name="user-id" value="{{ old('user-id') }}"     autocomplete="name" autofocus required>
                                     </div>
                                     @error('user-id')
                                         <span class="text-danger" role="alert">
                                             <strong>{{ $message }}</strong>
                                         </span>
                                     @enderror
+                                    <span id="id-register-error" class="text-danger fw-bold small"></span>
                                 </div>
                                 <div class="col-md-6">
                                     <div class="input-box">
                                         <i class="fas fa-envelope"></i>
-                                        <input id="email-register" type="email" placeholder="{{ __('Enter email') }}" class="@error('email') is-invalid @enderror" name="email" value="{{ old('email') }}" required autocomplete="email" autofocus>
+                                        <input id="email-register" type="email" placeholder="{{ __('Enter email') }}" class="@error('email') is-invalid @enderror" name="email" value="{{ old('email') }}"   autocomplete="email" autofocus required>
                                     </div>
                                     @error('email')
                                         <span class="text-danger" role="alert">
                                             <strong>{{ $message }}</strong>
                                         </span>
                                     @enderror
+                                    <span id="email-register-error" class="text-danger fw-bold small"></span>
                                 </div>
                             </div>
 
                             <div class="input-box">
                                 <i class="fas fa-lock"></i>
-                                <input id="password-register" type="password" class="@error('password') is-invalid @enderror" name="password-register" required autocomplete="current-password" placeholder="{{ __('Enter password') }}">
+                                <input id="password-register" type="password" class="@error('password-register') is-invalid @enderror" name="password-register"   autocomplete="current-password" placeholder="{{ __('Enter password') }}" required>
                             </div>
-                            
-                            <div class="input-box">
+
+                            <!-- <div class="input-box">
                                 <i class="fas fa-lock"></i>
-                                <input id="password-confirm" type="password" class="@error('password_confirmation') is-invalid @enderror" name="password_confirmation" required autocomplete="new-password" placeholder="{{ __('Confirm password') }}">
-                            </div>
+                                <input id="password-confirm" type="password" class="@error('password-confirmation') is-invalid @enderror" name="password-confirmation" autocomplete="new-password" placeholder="{{ __('Confirm password') }}">
+                            </div> -->
                             @error('password-register')
                                 <span class="text-danger" role="alert">
                                     <strong>{{ $message }}</strong>
                                 </span>
                             @enderror
+                            <div id="password-register-strength"></div>
+                            <span id="password-register-error" class="text-danger fw-bold small"></span>
 
                             <div class="mt-4">
                                 {!! NoCaptcha::renderJs() !!}
@@ -150,14 +154,15 @@
                             @enderror
 
                             <div class="form-check mt-3">
-                                <input class="form-check-input" type="checkbox" name="terms" id="terms">
+                                <input class="form-check-input" id="terms-register" type="checkbox" id="terms" >
                                 <span class="form-check-label" for="remember">
                                     {{ __('I Accept the ') }} <label><a href="#">{{ __('Terms and Conditions') }}</a></label>
                                 </span>
                             </div>
+                            <span id="terms-register-error" class="text-danger fw-bold small"></span>
                             
                             <div class="button input-box">
-                                <input type="submit" value="{{ __('Register') }}">
+                                <input id="submit-register" type="submit" value="{{ __('Register') }}">
                             </div>
 
                             <div class="text sign-up-text">{{ __('Already have an account? ') }}<label for="flip">{{ __('Login') }}</label></div>
@@ -168,4 +173,201 @@
         </div>
     </div>
 </div>
+@endsection
+
+@section('script')
+<script>
+    $(document).ready(function() {
+        var checkbox = $('#flip');
+
+        var checkboxValue = $.cookie('checkboxValue');
+        if (checkboxValue === 'checked') {
+            checkbox.prop('checked', true);
+        }
+
+        checkbox.change(function() {
+            $.cookie('checkboxValue', checkbox.prop('checked') ? 'checked' : '', { expires: 1, path: '/' });
+        });
+
+        $('#register-form').submit(function() {
+            $.cookie('checkboxValue', checkbox.prop('checked') ? 'checked' : '', { expires: 1, path: '/' });
+        });
+
+        // Validations
+        const $emailLoginInput = $('#email-login');
+        const $passwordLoginInput = $('#password-login');
+        const $emailLoginError = $('#email-login-error');
+        const $passwordLoginError = $('#password-login-error');
+
+
+        // Clear error message on focus
+        $emailLoginInput.focus(function() {
+            $emailLoginError.text('');
+        });
+
+        $passwordLoginInput.focus(function() {
+            $passwordLoginError.text('');
+        });
+
+        $('#login-form').on('submit', function (event) {
+            if (!validateLoginForm()) {
+                event.preventDefault();
+            }
+        });
+
+        function validateLoginForm() {
+            let isValid = true;
+
+            if ($emailLoginInput.value.trim() === '') {
+                $emailLoginInput.classList.add('is-invalid');
+                $emailLoginError.textContent = 'Credentials are required.';
+                isValid = false;
+            } else {
+                $emailLoginInput.classList.remove('is-invalid');
+                $emailLoginError.textContent = '';
+            }
+
+            if ($passwordLoginInput.value.trim() === '') {
+                $passwordLoginInput.classList.add('is-invalid');
+                $passwordLoginError.textContent = 'Credentials are required.';
+                isValid = false;
+            } else {
+                $passwordLoginInput.classList.remove('is-invalid');
+                $passwordLoginError.textContent = '';
+            }
+
+            return isValid;
+        }
+
+        const $idRegisterInput = $('#id-register');
+        const $emailRegisterInput = $('#email-register');
+        const $passwordRegisterInput = $('#password-register');
+        const $passwordConfirmInput = $('#password-confirm');
+        const $termsRegister = $('#terms-register');
+        const $idRegisterError = $('#id-register-error');
+        const $emailRegisterError = $('#email-register-error');
+        const $passwordRegisterError = $('#password-register-error');
+        const $termsRegisterError = $('#terms-register-error');
+        const $passwordRegisterStrength = $('#password-register-strength');
+        const $submitButton = $('#submit-register');
+
+        // Clear error message on focus
+        $idRegisterInput.focus(function() {
+            $idRegisterError.text('');
+        });
+
+        $emailRegisterInput.focus(function() {
+            $emailRegisterError.text('');
+        });
+
+        $passwordRegisterInput.focus(function() {
+            $passwordRegisterError.text('');
+        });
+
+        $passwordRegisterInput.on('input', function () {
+            const password = $passwordRegisterInput.val().trim();
+
+            if (password !== '') {
+                $passwordRegisterInput.removeClass('is-invalid');
+                $passwordRegisterError.text('');
+            }
+            
+            let strengthMessage = '';
+            let passwordStrength = 0;
+
+            if (password.length > 8) {
+            passwordStrength++;
+            }
+
+            if (password.match(/[a-z]/)) {
+            passwordStrength++;
+            }
+
+            if (password.match(/[A-Z]/)) {
+            passwordStrength++;
+            }
+
+            if (password.match(/\d/)) {
+            passwordStrength++;
+            }
+
+            if (password.match(/[!@#$%^&*()_+{}\[\]:;<>,.?~\\|\-=]/)) {
+            passwordStrength++;
+            }
+
+            switch (passwordStrength) {
+            case 1:
+                strengthMessage = 'Password Strength: Weak';
+                $passwordRegisterStrength.removeClass().addClass('text-danger fw-bold small');
+                break;
+            case 2:
+                strengthMessage = 'Password Strength: Moderate';
+                $passwordRegisterStrength.removeClass().addClass('text-warning fw-bold small');
+                break;
+            case 3:
+            case 4:
+                strengthMessage = 'Password Strength: Strong';
+                $passwordRegisterStrength.removeClass().addClass('text-success fw-bold small');
+                break;
+            case 5:
+                strengthMessage = 'Password Strength: Very Strong';
+                break;
+            default:
+                strengthMessage = '';
+            }
+
+            $passwordRegisterStrength.text(strengthMessage);
+        });
+
+        $('#register-form').on('submit', function (event) {
+            if (!validateRegisterForm()) {
+                event.preventDefault();
+            }
+        });
+
+        function validateRegisterForm() {
+            let isValid = true;
+
+            if ($idRegisterInput.val().trim() === '') {
+                $idRegisterInput.addClass('is-invalid');
+                $idRegisterError.text('ID number is required.');
+                isValid = false;
+            } else {
+                $idRegisterInput.removeClass('is-invalid');
+                $idRegisterError.text('');
+            }
+
+            if ($emailRegisterInput.val().trim() === '') {
+                $emailRegisterInput.addClass('is-invalid');
+                $emailRegisterError.text('Email address is required.');
+                isValid = false;
+            } else {
+                $emailRegisterInput.removeClass('is-invalid');
+                $emailRegisterError.text('');
+            }
+
+            if ($passwordRegisterInput.val().trim() === '') {
+                $passwordRegisterInput.addClass('is-invalid');
+                $passwordRegisterError.text('Password is required.');
+                isValid = false;
+            } else if ($passwordRegisterInput.val().trim().length < 8) {
+                $passwordRegisterInput.addClass('is-invalid');
+                $passwordRegisterError.text('Password should not be less than 8 characters.');
+                isValid = false;
+            } else {
+                $passwordRegisterInput.removeClass('is-invalid');
+                $passwordRegisterError.text('');
+            }
+
+            if (!$termsRegister.is(':checked')) {
+                $termsRegisterError.text('You must accept the Terms and Conditions.');
+                isValid = false;
+            } else {
+                $termsRegisterError.text('');
+            }
+
+            return isValid;
+        }
+    });
+</script>
 @endsection
