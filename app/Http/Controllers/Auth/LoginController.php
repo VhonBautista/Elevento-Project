@@ -48,23 +48,35 @@ class LoginController extends Controller
         } else {
             $credentials['user_id'] = $data['email-or-user-id'];
         }
-    
+        
         if (Auth::attempt(array_merge($credentials, ['password' => $data['password']]))) {
-            $user_type = Auth::user()->role;
-            switch ($user_type) {
-                case 'admin':
-                    return redirect()->route('admin.home');
-                case 'co_admin':
-                    return redirect()->route('co_admin.home');
-                case 'organizer':
-                    return redirect()->route('organizer.home');
-                case 'attendee':
-                    return redirect()->route('attendee.home');
-                default:
-                    abort(401);
-            }
+            return $this->authenticated($data, Auth::user());
         } else {
-            return redirect()->route('login')->with('error-login', 'Invalid credentials. Please double-check your email/user ID and password.');
+            return redirect()->route('login')->with('error-login', 'Invalid credentials. Please double-check your email/user ID and password.')->withInput();
         }
+    }
+
+    protected function authenticated(Request $request, $user)
+    {
+        switch ($user->role) {
+            case 'admin':
+                return redirect()->route('admin.home');
+            case 'co_admin':
+                return redirect()->route('co_admin.home');
+            case 'organizer':
+                return redirect()->route('organizer.home');
+            case 'attendee':
+                return redirect()->route('attendee.home');
+            default:
+                abort(401);
+        }
+    }
+
+    public function showLoginForm()
+    {
+        if (auth()->check()) {
+            return $this->authenticated(request(), auth()->user());
+        }
+        return view('auth.login');
     }
 }

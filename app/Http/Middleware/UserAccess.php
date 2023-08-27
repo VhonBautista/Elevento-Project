@@ -15,8 +15,22 @@ class UserAccess
      */
     public function handle(Request $request, Closure $next, $user_type): Response
     {
-        if (auth()->user()->role == $user_type)
-        {
+        $currentUserRole = auth()->user()->role;
+
+        if (
+            ($currentUserRole == 'admin' || $currentUserRole == 'co_admin') &&
+            $user_type != 'organizer'
+        ) {
+            return $next($request);
+        } elseif (
+            $currentUserRole == 'organizer' &&
+            ($user_type == 'organizer' || $user_type == 'attendee')
+        ) {
+            return $next($request);
+        } elseif (
+            $currentUserRole == 'attendee' &&
+            $user_type == 'attendee'
+        ) {
             return $next($request);
         }
 

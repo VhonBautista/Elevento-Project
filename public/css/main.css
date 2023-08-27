@@ -88,7 +88,7 @@
   text-align: center;
 }
 .cover .text .text-2{
-  font-size: 15px;
+  font-size: 14px;
   font-weight: 500;
 }
 .form-container .forms{
@@ -142,7 +142,7 @@
   outline: none;
   border: none;
   padding: 0 30px;
-  font-size: 16px;
+  font-size: 14px;
   font-weight: 500;
   border-bottom: 2px solid rgba(0,0,0,0.2);
   transition: all 0.3s ease;
@@ -153,7 +153,7 @@
 .form-content .input-box i{
   position: absolute;
   color: #2A93E8;
-  font-size: 17px;
+  font-size: 16px;
 }
 .forms .form-content .text{
   font-size: 14px;
@@ -206,8 +206,18 @@
   .form-content .signup-form{
     width: 100%;
   }
+  .form-container, .form-container-2 {
+    padding: 30px 6px;
+  }
   .form-content .signup-form{
     display: none;
+  }
+  .form-content .captcha-box{
+    width: 200px;
+    height: 76px;
+    border: 1.2px solid #d0d0d0;
+    border-radius: 6px;
+    overflow: hidden;
   }
   .form-container #flip:checked ~ .forms .signup-form{
     display: block;
@@ -215,4 +225,263 @@
   .form-container #flip:checked ~ .forms .login-form{
     display: none;
   }
+}
+
+/* Admin Side Bar */
+.side-menu{
+  position: relative;
+  min-height: 100vh;
+  width: 100%;
+  overflow: hidden;
+}
+.sidebar{
+  position: fixed;
+  top: 0;
+  left: 0;
+  height: 100%;
+  width: 72px;
+  background-image: url('../asset/background_blue.png');
+  background-size: cover;
+  padding: 6px 14px;
+  transition: all 0.5s ease;
+}
+.sidebar.active-sidebar{
+  width: 240px;
+}
+.sidebar .logo-content .logo{
+  color: #fff;
+  display: flex;
+  height: 50px;
+  width: 100%;
+  align-items: center;
+  opacity: 0;
+  pointer-events: none;
+  transition: all 0.5s ease;
+}
+.sidebar.active-sidebar .logo-content .logo{
+  opacity: 1;
+  pointer-events: none;
+}
+.sidebar .nav-list{
+  padding: 0;
+}
+.logo-content .logo i{
+  font-size: 24px;
+  margin-right: 8px;
+}
+.logo-content .logo .logo-name{
+  font-size: 22px;
+  font-weight: 500;
+}
+.sidebar #menu-btn{
+  position: absolute;
+  color: #fff;
+  left: 50%;
+  top: 5px;
+  font-size: 20px;
+  height: 50px;
+  width: 50px;
+  text-align: center;
+  line-height: 50px;
+  transform: translate(-50%);
+  transition: all 0.5s ease;
+  cursor: pointer;
+}
+.sidebar.active-sidebar #menu-btn{
+  left: 90%;
+}
+.sidebar ul{
+  margin-top: 20px;
+}
+.sidebar ul li{
+  position: relative;
+  height: 50px;
+  width: 100%;
+  margin: 0 5px;
+  list-style: none;
+  line-height: 50px;
+}
+.sidebar ul li .tool-tip{
+  position: absolute;
+  left: 126px;
+  height: 35px;
+  width: 118px;
+  top: 45%;
+  transform: translate(-50% , -50%);
+  border-radius: 6px;
+  margin: 0 5px;
+  background: #fff;
+  line-height: 35px;
+  text-align: center;
+  box-shadow: 0 5px 10px rgba(0,0,0,0.2);
+  transition: 0s;
+  opacity: 0;
+  pointer-events: none;
+  display: block;
+}
+.sidebar.active-sidebar ul li .tool-tip{
+  display: none;
+}
+.sidebar ul li:hover .tool-tip{
+  transition: all 0.5s ease;
+  opacity: 1;
+  top: 45%;
+  left: 114px;
+}
+.sidebar .active{
+  background: #116B9E;
+  width: 104%;
+  border-top-left-radius: 12px;
+  border-bottom-left-radius: 12px;
+}
+.sidebar.active-sidebar ul li a{
+  color: #fff;
+  display: flex;
+  align-items: center;
+  text-decoration: none;
+  width: 104%;
+  height: 90%;
+  transition: all 0.4s ease-in-out;
+  border-top-right-radius: 0;
+  border-bottom-right-radius: 0;
+  white-space: nowrap;
+}
+.sidebar.active-sidebar ul li a:hover{
+  margin-left: 11px;
+  background: #116B9E;
+  width: 99%;
+}
+.sidebar ul li a{
+  color: #fff;
+  display: flex;
+  align-items: center;
+  text-decoration: none;
+  width: 100%;
+  height: 90%;
+  transition: all 0.5s ease;
+  border-radius: 12px;
+  white-space: nowrap;
+  margin-left: -6px;
+}
+.sidebar.active-sidebar ul li a{
+  margin-left: 0;
+}
+.sidebar ul li a:hover{
+  background: #116B9E;
+}
+.sidebar ul li a i{
+  height: 50px;
+  min-width: 50px;
+  border-radius: 12px;
+  line-height: 50px;
+  text-align: center;
+  margin-left: -3px;
+  transition: all 0.5s ease;
+}
+.sidebar.active-sidebar ul li a i{
+  margin-left: 0;
+}
+.sidebar .side-link-name{
+  opacity: 0;
+  pointer-events: none;
+  transition: all 0.5s ease;
+}
+.sidebar.active-sidebar .side-link-name{
+  opacity: 1;
+  pointer-events: all;
+}
+.sidebar .profile-content{
+  position: absolute;
+  color: #fff;
+  bottom: 0;
+  left: 0;
+  width: 100%;
+}
+.sidebar .profile-content .profile{
+  position: relative;
+  padding: 10px 6px;
+  height: 65px;
+  background-color: none;
+  padding-left: 12px;
+  transition: all 0.5s ease;
+}
+.sidebar.active-sidebar .profile-content .profile{
+  background: #116B9E;
+}
+.profile-content .profile .profile-details{
+  display: flex;
+  align-items: center;
+  opacity: 0;
+  pointer-events: none;
+  white-space: nowrap;
+  transition: all 0.5s ease;
+}
+.sidebar.active-sidebar .profile .profile-details{
+  opacity: 1;
+  pointer-events: all;
+}
+.profile-content .profile .profile-details img{
+  height: 45px;
+  width: 45px;
+  object-fit: cover;
+  border-radius: 12px;
+}
+.profile-content .profile .profile-details .name-role{
+  margin-left: 10px;
+}
+.profile-content .profile .profile-details .user-name{
+  font-size: 16px;
+  font-weight: 400;
+}
+.profile-content .profile .profile-details .user-role{
+  font-size: 12px;
+}
+.profile #logout{
+  position: absolute;
+  left: 50%;
+  bottom: 6px;
+  transform: translate(-50%);
+  min-width: 50px;
+  line-height: 50px;
+  font-size: 20px;
+  border-radius: 12px;
+  text-align: center;
+  transition: all 0.4s ease;
+  background: #116B9E;
+}
+.sidebar.active-sidebar .profile #logout{
+  left: 88%;
+  background: none;
+}
+.admin-content{
+  position: absolute;
+  height: 100%;
+  width: calc(100% - 72px);
+  left: 72px;
+  transition: all 0.5s ease;
+}
+.admin-content .text{
+  font-weight: 500;
+  font-size: 25px;
+  color: #116B9E;
+  margin: 12px;
+}
+.sidebar.active-sidebar ~ .admin-content{
+  width: calc(100% - 240px);
+  left: 240px;
+}
+.notification{
+  font-size: 10px !important;
+  top: 5px !important;
+}
+.circular-avatar {
+  width: 38px;
+  height: 37px;
+  border-radius: 50%;
+  overflow: hidden;
+}
+.circular-avatar img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
 }
