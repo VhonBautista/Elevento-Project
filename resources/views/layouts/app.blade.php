@@ -70,7 +70,7 @@
         <footer class="bg-white text-dark text-center p-4">
             <div class="row g-3">
                 <div class="col-md-6">
-                    <p class="m-0">&copy; 2023 Elevento Team. All Rights Reserved.</p>
+                    <p class="m-0">Copyright &copy; 2023 Elevento Team. All Rights Reserved.</p>
                 </div>
                 <div class="col-md-6">
                     <a href="#" class="text-dark mx-2"><i class="fab fa-facebook-f"></i></a>
@@ -85,6 +85,9 @@
     </div>
 
     <!-- Scripts -->
+    <script src="//cdn.datatables.net/1.13.4/js/jquery.dataTables.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
     @yield('script')
     <script>
         function updateRealTime() {

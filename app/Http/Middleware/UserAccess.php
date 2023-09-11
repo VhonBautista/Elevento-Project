@@ -18,18 +18,18 @@ class UserAccess
         $currentUserRole = auth()->user()->role;
 
         if (
-            ($currentUserRole == 'admin' || $currentUserRole == 'co_admin') &&
-            $user_type != 'organizer'
+            ($currentUserRole == 'Admin' || $currentUserRole == 'Co-Admin') &&
+            $user_type != 'Organizer'
         ) {
             return $next($request);
         } elseif (
-            $currentUserRole == 'organizer' &&
-            ($user_type == 'organizer' || $user_type == 'attendee')
+            $currentUserRole == 'Organizer' &&
+            ($user_type == 'Organizer' || $user_type == 'User')
         ) {
             return $next($request);
         } elseif (
-            $currentUserRole == 'attendee' &&
-            $user_type == 'attendee'
+            $currentUserRole == 'User' &&
+            $user_type == 'User'
         ) {
             return $next($request);
         }

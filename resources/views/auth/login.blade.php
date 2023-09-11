@@ -129,10 +129,6 @@
                                     <input id="password-register" type="password" class="@error('password-register') is-invalid @enderror" name="password-register"   autocomplete="current-password" placeholder="{{ __('Enter password') }}" required>
                                 </div>
 
-                                <!-- <div class="input-box">
-                                    <i class="fas fa-lock"></i>
-                                    <input id="password-confirm" type="password" class="@error('password-confirmation') is-invalid @enderror" name="password-confirmation" autocomplete="new-password" placeholder="{{ __('Confirm password') }}">
-                                </div> -->
                                 @error('password-register')
                                 <span class="text-danger fw-bold small" role="alert">
                                     {{ $message }}
@@ -147,8 +143,6 @@
                                         </span>
                                     </div>
                                 </div>
-
-
                                 <span id="password-register-error" class="text-danger fw-bold small"></span>
 
                                 <div class="mt-2 captcha-box" style="">
@@ -263,7 +257,6 @@
         const $idRegisterInput = $('#id-register');
         const $emailRegisterInput = $('#email-register');
         const $passwordRegisterInput = $('#password-register');
-        const $passwordConfirmInput = $('#password-confirm');
         const $termsRegister = $('#terms-register');
         const $idRegisterError = $('#id-register-error');
         const $emailRegisterError = $('#email-register-error');

@@ -4,6 +4,7 @@ namespace App\Http\Controllers\Auth;
 
 use App\Http\Controllers\Controller;
 use App\Providers\RouteServiceProvider;
+use App\Models\CampusEntity;
 use Illuminate\Foundation\Auth\AuthenticatesUsers;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
@@ -58,15 +59,18 @@ class LoginController extends Controller
 
     protected function authenticated(Request $request, $user)
     {
+        $campus = CampusEntity::where('user_id', $user->user_id)->value('campus');
+        session(['campus' => $campus]);
+
         switch ($user->role) {
-            case 'admin':
-                return redirect()->route('admin.home');
-            case 'co_admin':
-                return redirect()->route('co_admin.home');
-            case 'organizer':
+            case 'Admin':
+                return redirect()->route('admin.dashboard');
+            case 'Co-Admin':
+                return redirect()->route('co_admin.dashboard');
+            case 'Organizer':
                 return redirect()->route('organizer.home');
-            case 'attendee':
-                return redirect()->route('attendee.home');
+            case 'User':
+                return redirect()->route('home');
             default:
                 abort(401);
         }

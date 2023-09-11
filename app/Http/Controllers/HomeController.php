@@ -21,9 +21,9 @@ class HomeController extends Controller
      *
      * @return \Illuminate\Contracts\Support\Renderable
      */
-    public function attendeeHome()
+    public function home()
     {
-        return view('user_attendee.home');
+        return view('home');
     }
 
     /**
@@ -43,6 +43,6 @@ class HomeController extends Controller
      */
     public function adminHome()
     {
-        return view('user_admin.home');
+        return view('user_admin.dashboard');
     }
 }

@@ -18,12 +18,12 @@ class User extends Authenticatable
      * @var array<int, string>
      */
     protected $fillable = [
-        'user_id',
-        'profile_picture',
+        'role',
         'username',
+        'profile_picture',
         'email',
         'password',
-        'role',
+        'user_id',
         'organization_id',
     ];
 
@@ -46,4 +46,9 @@ class User extends Authenticatable
         'email_verified_at' => 'datetime',
         'password' => 'hashed',
     ];
+
+    public function campusEntity()
+    {
+        return $this->hasOne(CampusEntity::class, 'user_id', 'user_id');
+    }
 }
