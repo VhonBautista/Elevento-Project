@@ -500,12 +500,12 @@
 }
 
 /* Settings */
-.image-container {
+.image-container, .image-container-update {
   width: 90%;
-  margin: 0 auto 30px auto;
+  margin: 0 auto 0 auto;
   position: relative;
 }
-.image-container img {
+.image-container img, .image-container-update img {
   display: block;
   position: absolute;
   top: 0;

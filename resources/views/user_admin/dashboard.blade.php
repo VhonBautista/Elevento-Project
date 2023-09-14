@@ -130,7 +130,7 @@
                             <div class="row">
                                 <div class="col-md-8 mb-3">
 
-                                    <span class="m-0 text-1">{{ __('Happening Today') }}</span>
+                                    <span class="m-0 text fw-normal">{{ __('Happening Today') }}</span>
                                     <div id="carouselExampleCaptions" class="carousel mt-2 mb-4 slide" data-bs-ride="carousel">
                                         <div class="carousel-indicators">
                                             <button type="button" data-bs-target="#carouselExampleCaptions" data-bs-slide-to="0" class="active" aria-current="true" aria-label="Slide 1"></button>
@@ -176,8 +176,8 @@
                                     <div class="alert alert-danger d-none" role="alert" id="weather-error">
                                         <div id="weather-message"></div>
                                     </div>
-                                    <span class="m-0 text-1">{{ __('Weather Today') }}</span>
-                                    <div class="weather-data mb-2 mt-2">
+                                    <span class="m-0 text fw-normal">{{ __('Weather Today') }}</span>
+                                    <div class="weather-data mb-0 mt-2">
                                         <div class="current-weather mb-2" style="box-shadow: 3px 3px 4px #888888;">
                                             <div class="details" style="width: 100%;">
                                                 <h5 class="card-title placeholder-glow">
@@ -205,7 +205,7 @@
                                             <button class="search-btn">Search</button>
                                         </div>
                                         <div class="days-forecast">
-                                            <span class="m-0 text-1">{{ __('5 Day Forecast') }}</span>
+                                            <span class="m-0 text-1 fw-normal">{{ __('5 Day Forecast') }}</span>
                                             <div class="weather-cards p-0 mt-2">
                                                 <div class="items" style="width: 100%;">
                                                     <div class="spinner-border" role="status">
@@ -236,7 +236,7 @@
                                         </div>
                                     </div>
                                    
-                                    <span class="m-0 text-1 liner">{{ __('Pending Events') }}</span>
+                                    <span class="m-0 text-1 fw-normal">{{ __('Pending Events') }}</span>
                                     <div class="d-flex justify-content-center align-items-center p-5" id="pending-event-loader">
                                         <div class="spinner-border text-primary" role="status">
                                             <span class="visually-hidden">Loading...</span>
@@ -577,20 +577,31 @@
             
             events: [
                     {
-                    title  : 'event1',
-                    start  : '2023-09-05'
+                    title  : 'Sample Event Festive',
+                    start  : '2023-09-25'
                     },
                     {
-                    title  : 'event2',
-                    start  : '2023-09-05',
-                    end    : '2023-09-11'
+                    title  : 'Sample Event Seminar',
+                    start  : '2023-09-13',
+                    end    : '2023-09-16'
                     },
                     {
-                    title  : 'event3',
-                    start  : '2023-09-05 13:38:09',
+                    title  : 'Sample Event Conference',
+                    start  : '2023-09-17',
+                    end    : '2023-09-19'
+                    },
+                    {
+                    title  : 'Sample Event Conference 2',
+                    start  : '2023-09-14',
+                    end    : '2023-09-16'
+                    },
+                    {
+                    title  : 'Sample Event Workshop',
+                    start  : '2023-10-05',
+                    end    : '2023-10-08'
                     }
                 ],
-            eventColor: '#378006'
+            eventColor: '#2A93E8'
 
         });
         calendar.render();

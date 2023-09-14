@@ -16,6 +16,11 @@ return new class extends Migration
 
             // defaults
             $table->enum('role', ['User', 'Organizer', 'Admin', 'Co-Admin'])->default('User');
+            $table->boolean('is_disabled')->default(false);
+            $table->boolean('manage_user')->default(false);
+            $table->boolean('manage_venue')->default(false);
+            $table->boolean('manage_campus')->default(false);
+            $table->boolean('manage_event')->default(false);
 
             // fields
             $table->string('username');
@@ -23,7 +28,6 @@ return new class extends Migration
             $table->string('email')->unique();
             $table->timestamp('email_verified_at')->nullable();
             $table->string('password');
-            $table->boolean('isDisabled');
             $table->string('user_id', 20); // FK
             $table->unsignedBigInteger('organization_id')->nullable(); // FK
             $table->rememberToken();

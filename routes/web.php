@@ -3,6 +3,7 @@
 use App\Http\Controllers\HomeController;
 use App\Http\Controllers\AdminManagementController;
 use App\Http\Controllers\ProfileController;
+use App\Http\Controllers\VenueController;
 use App\Http\Controllers\Auth\RegisterController;
 use Illuminate\Support\Facades\Route;
 
@@ -34,6 +35,15 @@ Route::middleware(['auth', 'user-access:Admin'])->group(function (){
     Route::get('/admin/get-admins', [AdminManagementController::class, 'getAdmins']);
     Route::get('/admin/get-users', [AdminManagementController::class, 'getUsers']);
     Route::post('/update-is-disabled', [AdminManagementController::class, 'updateIsDisabled']);
+    Route::post('/get-permission', [AdminManagementController::class, 'getPermission']);
+    Route::post('/update-permission', [AdminManagementController::class, 'updatePermission']);
+    
+    Route::get('/admin/get-venues', [VenueController::class, 'getVenues']);
+    Route::post('/get-selected-venue', [VenueController::class, 'getSelectedVenue']);
+    Route::post('/update-venue', [VenueController::class, 'updateVenue']);
+    Route::post('/update-venue-status', [VenueController::class, 'updateStatus']);
+    Route::post('/delete-venue', [VenueController::class, 'destroy']);
+    Route::post('/admin/create-venue', [VenueController::class, 'store'])->name('admin.store_venue');
 });
 
 Route::middleware(['auth', 'user-access:Co-Admin'])->group(function (){

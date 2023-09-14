@@ -72,8 +72,7 @@ class RegisterController extends Controller
             'user_id' => $inputUserId,
             'username' => $username,
             'email' => $data['email'],
-            'password' => Hash::make($data['password-register']),
-            'isDisabled' => 0,
+            'password' => Hash::make($data['password-register'])
         ]);
 
         Auth::login($user);

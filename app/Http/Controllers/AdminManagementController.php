@@ -24,11 +24,12 @@ class AdminManagementController extends Controller
         $campus = session('campus');
         $users = User::select(
             'users.id', 
+            'users.user_id', 
             'users.role', 
             'users.email', 
             'users.profile_picture', 
             'users.username', 
-            'users.isDisabled', 
+            'users.is_disabled', 
             'campus_entities.sex', 
             'campus_entities.type', 
             'campus_entities.department_code',
@@ -64,6 +65,7 @@ class AdminManagementController extends Controller
         $campus = session('campus');
         $admins = User::select(
             'users.id',
+            'users.user_id',
             'users.role',
             'users.email',
             'users.profile_picture',
@@ -76,7 +78,7 @@ class AdminManagementController extends Controller
         ->where('users.role', 'Co-Admin')
         ->get();
         
-        if ($admins->isNotEmpty()) {
+        if ($admins) {
             return response()->json([
                 'message' => 'Data is present.',
                 'code' => 200,
@@ -90,6 +92,46 @@ class AdminManagementController extends Controller
         }
     }
 
+    public function getPermission(Request $request)
+    {
+        $user = User::where('id', $request->id)->first();
+
+        if ($user){
+            return response()->json([
+                'success' => true, 
+                'code' => 200, 
+                'data' => $user
+            ]);
+        } else {
+            return response()->json([
+                'error' => 'Internal server error.',
+                'code' => 500
+            ]);
+        }
+    }
+
+    public function updatePermission(Request $request)
+    {
+        $user = User::where('id', $request->selected_id)->update([
+            'manage_user' => $request->has('update_manage_user') ? 1 : 0,
+            'manage_venue' => $request->has('update_manage_venue') ? 1 : 0,
+            'manage_campus' => $request->has('update_manage_campus') ? 1 : 0,
+            'manage_event' => $request->has('update_manage_event') ? 1 : 0,
+        ]);        
+
+        if ($user){
+            return response()->json([
+                'success' => true, 
+                'code' => 200
+            ]);
+        } else {
+            return response()->json([
+                'error' => 'Internal server error.',
+                'code' => 500
+            ]);
+        }
+    }
+
     public function store(Request $request)
     {
         $inputUserId = strtoupper(trim($request->user_id));
@@ -97,19 +139,19 @@ class AdminManagementController extends Controller
         $campusEntity = CampusEntity::where('user_id', $inputUserId)->first();
 
         if (!$campusEntity) {
-            return response()->json(['errorRegister' => 'Ensure that you belong to PSU and that your user ID is valid.']);
+            return response()->json(['validate' => 'Ensure that you belong to PSU and that your user ID is valid.']);
         }
 
         $existingUser = User::where('user_id', $inputUserId)->first();
 
         if ($existingUser) {
-            return response()->json(['errorRegister' => 'User ID already has an existing account.']);
+            return response()->json(['validate' => 'User ID already has an existing account.']);
         }
 
         $existingEmail = User::where('email', $request->email)->first();
 
         if ($existingEmail) {
-            return response()->json(['errorRegister' => 'Email has already been taken. Please choose a different one.']);
+            return response()->json(['validate' => 'Email has already been taken. Please choose a different one.']);
         }
         
         $username = ucfirst(strtolower($campusEntity->firstname));
@@ -120,18 +162,21 @@ class AdminManagementController extends Controller
         $user->username = $username;
         $user->email = $request->email;
         $user->password = Hash::make($request->password);
-        $user->isDisabled = 0;
+        $user->manage_user = $request->has('manage_user') ? 1 : 0;
+        $user->manage_venue = $request->has('manage_venue') ? 1 : 0;
+        $user->manage_campus = $request->has('manage_campus') ? 1 : 0;
+        $user->manage_event = $request->has('manage_event') ? 1 : 0;
 
         $result = $user->save();
         
         if($result) {
             return response()->json([
-                'successRegister' => 'Co-Administrator was created successfully',
+                'success' => 'A new co-administrator has been successfully added.',
                 'code' => 200
             ]);
         } else {
             return response()->json([
-                'errorRegister' => 'Internal server error.',
+                'error' => 'Internal server error.',
                 'code' => 500
             ]);
         }
@@ -140,13 +185,23 @@ class AdminManagementController extends Controller
     public function updateIsDisabled(Request $request)
     {
         $user = User::where('id', $request->id)->first();
-        if ($user->isDisabled){
-            $user->isDisabled = 0;
+        if ($user->is_disabled){
+            $user->is_disabled = 0;
         } else {
-            $user->isDisabled = 1;
+            $user->is_disabled = 1;
         }
         $user->save();
 
-        return response()->json(['success' => true, 'data' => $request->id]);
+        if($user) {
+            return response()->json([
+                'success' => true,
+                'code' => 200
+            ]);
+        } else {
+            return response()->json([
+                'error' => 'Internal server error.',
+                'code' => 500
+            ]);
+        }
     }
 }

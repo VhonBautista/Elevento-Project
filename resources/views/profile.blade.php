@@ -243,9 +243,9 @@
                                                     <div class="modal fade" id="changePhotoModal" tabindex="-1" aria-labelledby="changePhotoModalLabel" aria-hidden="true">
                                                         <div class="modal-dialog">
                                                             <div class="modal-content">
-                                                                <div class="modal-header">
-                                                                    <h1 class="modal-title fs-5" id="changePhotoModalLabel">Change Photo</h1>
-                                                                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                                                                <div class="modal-header bg-primary">
+                                                                    <h4 class="text-light m-0 modal-title fs-5">Change Photo</h4>
+                                                                    <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
                                                                 </div>
                                                                 <form action="{{ route('upload.photo') }}" method="post" enctype="multipart/form-data" class="container">
                                                                     <div class="modal-body">
@@ -468,9 +468,9 @@
                                 <div class="modal fade" id="requestModal" tabindex="-1" aria-labelledby="requestModalLabel" aria-hidden="true">
                                     <div class="modal-dialog">
                                         <div class="modal-content">
-                                            <div class="modal-header">
-                                                <h1 class="modal-title fs-5" id="requestModalLabel">Become an Organizer</h1>
-                                                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                                            <div class="modal-header bg-primary">
+                                                <h4 class="text-light m-0 modal-title">Become an Organizer</h4>
+                                                <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
                                             </div>
                                             <form action="{{ route('profile.request', ['id' => $user->id]) }}" method="post" id="request-form">
                                                 @csrf
