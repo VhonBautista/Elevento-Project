@@ -104,7 +104,7 @@
 
                                 <div class="input-box">
                                     <i class="fas fa-user"></i>
-                                    <input id="id-register" type="text" placeholder="{{ __('Enter ID number') }}" class="@error('user-id') is-invalid @enderror" name="user-id" value="{{ old('user-id') }}"     autocomplete="name" autofocus required>
+                                    <input id="id-register" type="text" placeholder="{{ __('Enter ID number') }}" class="@error('user-id') is-invalid @enderror" name="user-id" value="{{ old('user-id') }}" autocomplete="name" autofocus required>
                                 </div>
                                 @error('user-id')
                                 <span class="text-danger fw-bold small" role="alert">
@@ -115,7 +115,7 @@
 
                                 <div class="input-box">
                                     <i class="fas fa-envelope"></i>
-                                    <input id="email-register" type="email" placeholder="{{ __('Enter email') }}" class="@error('email') is-invalid @enderror" name="email" value="{{ old('email') }}"   autocomplete="email" autofocus required>
+                                    <input id="email-register" type="email" placeholder="{{ __('Enter email') }}" class="@error('email') is-invalid @enderror" name="email" value="{{ old('email') }}" autocomplete="email" autofocus required>
                                 </div>
                                 @error('email')
                                 <span class="text-danger fw-bold small" role="alert">

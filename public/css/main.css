@@ -3,6 +3,28 @@
   margin: 0;
   padding: 0;
 }
+.card {
+  box-shadow: 3px 3px 4px #888888;
+}
+.liner {
+  display: flex;
+  align-items: flex-start;
+  text-align: left;
+
+  &:after {
+    content: '';
+    flex-grow: 1;
+    border-radius: 20px;
+    height: 1.5px;
+    background: #1a92d7;
+    min-width: 20px;
+    margin: auto;
+  }
+
+  &:after {
+    margin-left: 20px;
+  }
+}
 .background-img {
   min-height: 100vh;
   display: flex;
@@ -441,7 +463,7 @@
   margin: 12px;
 }
 .text-1{
-  font-weight: 500;
+  font-weight: 600;
   font-size: 18px;
   color: #116B9E;
   margin: 12px;
@@ -463,6 +485,18 @@
   width: 100%;
   height: 100%;
   object-fit: cover;
+}
+.pending-date {
+  font-size: 10px;
+  color: #116B9E;
+}
+.pending-title {
+  font-size: 14px;
+  font-weight: 600;
+}
+.pending-type {
+  font-size: 10px;
+  color: #5a5a5a;
 }
 
 /* Settings */
@@ -513,15 +547,14 @@ input[type="file"]{
 }
 .weather-input input {
   width: 100%;
-  height: 40px;
+  height: 36px;
   outline: none;
-  padding: 0 17px;
+  padding: 0 12px;
   margin: 6px 0 12px 0;
   border-radius: 4px;
   border: 1px solid #ccc;
 }
 .weather-input input:focus {
-  padding: 0 16px;
   border: 2px solid #2A93E8;
 }
 .weather-input button {
@@ -549,10 +582,10 @@ input[type="file"]{
 }
 .current-weather h2 {
   font-weight: 700;
-  font-size: 22px;
+  font-size: 18px;
 }
 .weather-data h6 {
-  margin-top: 12px;
+  margin-top: -4px;
   font-size: 14px;
   font-weight: 500;
 }
@@ -576,39 +609,154 @@ input[type="file"]{
   width: 0;
 }
 .weather-cards .items {
-  min-width: 140px;
+  min-width: 100px;
   line-height: 120px;
   color: #fff;
-  padding: 12px 18px;
+  padding: 12px 8px;
   background: linear-gradient(to bottom right, #81b9e8, #065291);
   border-radius: 8px;
+  text-align: center;
 }
 .weather-cards .items h3 {
-  font-size: 14px;
+  font-size: 12px;
   font-weight: 600;
   margin-bottom: -50px;
 }
 .weather-cards .items img {
-  width: 70px;
-  align-self: center;
-  margin-bottom: -40px;
+  width: 50px;
+  margin-bottom: -20px;
 }
 .weather-cards .items h5 {
-  font-size: 14px;
-  text-align: center;
-  margin-top: -16px;
-  margin-bottom: 20px;
+  font-size: 12px;
+  margin-top: -28px;
+  margin-bottom: 12px;
   text-transform: capitalize;
 }
 .weather-cards .items h6 {
-  font-size: 12px;
+  font-size: 10px;
   margin-top: -3px;
+}
+
+/* calendar */
+#calendar {
+  margin: 0 auto;
+}
+
+/* table */
+.dataTables_scrollBody {
+  overflow-y: auto;
+  padding-bottom: 30px;
+}
+.dataTables_scrollBody::-webkit-scrollbar {
+  width: 0;
+}
+.dashboard-pending-table {
+  width: 100%;
+}
+.table-overflow {
+  height: 350px;
+  overflow-y: auto;
+}
+.table-overflow::-webkit-scrollbar {
+  width: 0;
+}
+.dataTables_wrapper.no-footer div.dataTables_scrollHead table.dataTable, .dataTables_scrollHeadInner {
+  width: 100% !important;
+}
+.dataTables_wrapper .dataTables_filter input {
+  border: 2px solid #2A93E8 !important;
+  border-radius: 50px !important;
+  padding: 5px 16px !important;
+  margin-left: 8px !important;
+  margin-bottom: 12px !important;
+  width: 85% !important;
+}
+.dataTables_wrapper.no-footer .dataTables_scrollBody {
+  height: 320px !important;
+  border-bottom: none !important;
+  overflow-y: scroll;
+}
+.dataTables_wrapper .dataTables_scroll {
+  position: relative;
+}
+.dataTables_wrapper .dataTables_scroll::before {
+  content: "";
+  position: absolute;
+  bottom: 0;
+  left: 0;
+  width: 100%;
+  height: 10%;
+  background: linear-gradient(to top, #f8f9fa, transparent);
+  z-index: 1;
+}
+.dataTables_wrapper .dataTables_filter, .dataTables_wrapper .dataTables_filter label {
+  width: 400px !important;
+}
+.dataTables_scrollHead, .dataTables_scrollHead thead {
+  border-radius: 8px;
+  background: linear-gradient(to top, #2A93E8, #217eca);
+  padding: 0 12px;
+  color: #fff;
+}
+.dataTables_wrapper .dataTables_paginate {
+  margin-top: 8px !important;
+  color: #fff !important;
+}
+.dataTables_wrapper .dataTables_paginate .paginate_button.current {
+  background: linear-gradient(to top, #1d68a5, #105084) !important;
+  border: none !important;
+}
+.dataTables_wrapper .dataTables_paginate .paginate_button.disabled {
+  background: linear-gradient(to top, transparent, transparent) !important;
+  border: none !important;
+}
+.dataTables_wrapper .dataTables_paginate .paginate_button {
+  background: linear-gradient(to top, #2A93E8, #217eca) !important;
+  border: none !important;
+}
+.dataTables_wrapper .dataTables_length {
+  padding-top: 7px;
+}
+.user-data-event-profile {
+  min-width: 230px !important;
+}
+
+
+@media (max-width: 1050px) {
+  .dataTables_wrapper .dataTables_filter input {
+    width: 75% !important;
+  }
 }
 
 @media (max-width: 900px) {
   .psu-logo .circular-avatar,
   .psu-logo .row {
     display: none;
+  }
+  .dataTables_wrapper .dataTables_length {
+    padding-top: 6px;
+  }
+  .dataTables_wrapper .dataTables_filter, .dataTables_wrapper .dataTables_filter label {
+    width: 70% !important;
+  }
+}
+
+@media (max-width: 767px) {
+  .user-data-event-profile{
+    min-width: 120px !important;
+  }
+  .user-data-event-profile p{
+    text-align: center;
+  }
+}
+
+@media (max-width: 640px) {
+  .dataTables_wrapper .dataTables_filter input {
+    width: 100% !important;
+  }
+  .dataTables_wrapper .dataTables_filter {
+    margin-left: auto;
+    margin-right: auto;
   }
 }
 

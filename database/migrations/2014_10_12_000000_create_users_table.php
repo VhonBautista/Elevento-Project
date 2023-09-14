@@ -23,6 +23,7 @@ return new class extends Migration
             $table->string('email')->unique();
             $table->timestamp('email_verified_at')->nullable();
             $table->string('password');
+            $table->boolean('isDisabled');
             $table->string('user_id', 20); // FK
             $table->unsignedBigInteger('organization_id')->nullable(); // FK
             $table->rememberToken();

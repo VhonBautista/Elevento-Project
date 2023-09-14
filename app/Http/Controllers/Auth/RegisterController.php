@@ -73,6 +73,7 @@ class RegisterController extends Controller
             'username' => $username,
             'email' => $data['email'],
             'password' => Hash::make($data['password-register']),
+            'isDisabled' => 0,
         ]);
 
         Auth::login($user);

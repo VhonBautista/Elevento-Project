@@ -23,6 +23,7 @@ class User extends Authenticatable
         'profile_picture',
         'email',
         'password',
+        'isDisabled',
         'user_id',
         'organization_id',
     ];
@@ -50,5 +51,10 @@ class User extends Authenticatable
     public function campusEntity()
     {
         return $this->hasOne(CampusEntity::class, 'user_id', 'user_id');
+    }
+
+    public function organization()
+    {
+        return $this->belongsTo(Organization::class);
     }
 }

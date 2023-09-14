@@ -39,7 +39,7 @@
                 </a>
             </li>
             <li>
-                <a href="">
+                <a href="{{ route('admin.management') }}">
                     <i class="fa-solid fa-toolbox"></i>
                     <span class="side-link-name">Management</span>
                 </a>
@@ -119,7 +119,7 @@
                 <li class="nav-item dropdown">
                     <a class="nav-link p-0 px-3 rounded-pill dropdown-toggle d-flex align-items-center" href="#" id="navbarDropdown" role="button" data-bs-toggle="dropdown" aria-expanded="false">
                         <div class="circular-avatar">
-                            <img src="{{ asset($user->profile_picture) }}" alt="Avatar">
+                            <img src="@if (Auth::user()->profile_picture == null) {{ asset('asset/blank_profile.jpg') }} @else {{ asset(Auth::user()->profile_picture) }} @endif">
                         </div>
                     </a>
     
@@ -338,7 +338,7 @@
                                                                     <div class="col">
                                                                         <div class="form-group">
                                                                             <label>{{ __('Organization') }}</label>
-                                                                            <input class="form-control" type="text" name="organization" value="@if($user->campusEntity->department){{ $user->campusEntity->department->department }}@endif" disabled>
+                                                                            <input class="form-control" type="text" name="organization" value="@if($user->organization){{ $user->organization->organization }}@endif" disabled>
                                                                         </div>
                                                                     </div>
                                                                 </div>

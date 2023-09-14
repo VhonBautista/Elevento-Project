@@ -16,4 +16,9 @@ class Organization extends Model
         'type',
         'campus',
     ];
+    
+    public function users()
+    {
+        return $this->hasMany(User::class);
+    }
 }

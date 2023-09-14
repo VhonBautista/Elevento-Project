@@ -1,6 +1,7 @@
 <?php
 
 use App\Http\Controllers\HomeController;
+use App\Http\Controllers\AdminManagementController;
 use App\Http\Controllers\ProfileController;
 use App\Http\Controllers\Auth\RegisterController;
 use Illuminate\Support\Facades\Route;
@@ -28,10 +29,16 @@ Route::post('/register', [RegisterController::class, 'register'])->name('registe
 
 Route::middleware(['auth', 'user-access:Admin'])->group(function (){
     Route::get('/admin/dashboard', [HomeController::class, 'adminHome'])->name('admin.dashboard');
+    Route::get('/admin/management', [AdminManagementController::class, 'index'])->name('admin.management');
+    Route::post('/admin/create-admin', [AdminManagementController::class, 'store'])->name('admin.store_admin');
+    Route::get('/admin/get-admins', [AdminManagementController::class, 'getAdmins']);
+    Route::get('/admin/get-users', [AdminManagementController::class, 'getUsers']);
+    Route::post('/update-is-disabled', [AdminManagementController::class, 'updateIsDisabled']);
 });
 
 Route::middleware(['auth', 'user-access:Co-Admin'])->group(function (){
     Route::get('/co-admin/dashboard', [HomeController::class, 'adminHome'])->name('co_admin.dashboard');
+    Route::get('/co-admin/management', [AdminManagementController::class, 'index'])->name('co_admin.management');
 });
 
 Route::middleware(['auth', 'user-access:Organizer'])->group(function (){
@@ -48,4 +55,6 @@ Route::middleware('auth')->group(function () {
     Route::put('/profile/{id}/password', [ProfileController::class, 'changePassword'])->name('profile.password');
     Route::post('/upload/photo', [ProfileController::class, 'upload'])->name('upload.photo');
     Route::post('/profile/request', [ProfileController::class, 'createRequest'])->name('profile.request');
+
+    Route::post('/events-feed', [AdminManagementController::class, 'getEvents'])->name('calendar.events');
 });

@@ -14,13 +14,61 @@ class EventSeeder extends Seeder
     public function run(): void
     {
         $events = [
-            ['event_type' => 'Conference'],
-            ['event_type' => 'Workshop'],
-            ['event_type' => 'Seminar'],
-            ['event_type' => 'Webinar'],
-            ['event_type' => 'Training'],
-            ['event_type' => 'Exhibition'],
-            ['event_type' => 'Festive'],
+            [
+                'title' => 'Sample Event Workshop',
+                'description' => 'Sample Description',
+                'cover_photo' => null,
+                'start_date' => now()->addDays(22),
+                'end_date' => now()->addDays(24),
+                'creator_id' => 2,
+                'campus' => 'Urdaneta',
+                'venue_id' => null,
+                'event_type' => 'Workshop',
+            ],
+            [
+                'title' => 'Sample Event Conference 2',
+                'description' => 'Sample Description',
+                'cover_photo' => null,
+                'start_date' => now()->addDays(1),
+                'end_date' => now()->addDays(2),
+                'creator_id' => 2,
+                'campus' => 'Urdaneta',
+                'venue_id' => null,
+                'event_type' => 'Conference',
+            ],
+            [
+                'title' => 'Sample Event Seminar',
+                'description' => 'Sample Description',
+                'cover_photo' => null,
+                'start_date' => now(),
+                'end_date' => now()->addDays(2),
+                'creator_id' => 2,
+                'campus' => 'Urdaneta',
+                'venue_id' => null,
+                'event_type' => 'Seminar',
+            ],
+            [
+                'title' => 'Sample Event Conference',
+                'description' => 'Sample Description',
+                'cover_photo' => null,
+                'start_date' => now()->addDays(4),
+                'end_date' => now()->addDays(5),
+                'creator_id' => 2,
+                'campus' => 'Urdaneta',
+                'venue_id' => null,
+                'event_type' => 'Conference',
+            ],
+            [
+                'title' => 'Sample Event Festive',
+                'description' => 'Sample Description',
+                'cover_photo' => null,
+                'start_date' => now()->addDays(12),
+                'end_date' => now()->addDays(12),
+                'creator_id' => 2,
+                'campus' => 'Urdaneta',
+                'venue_id' => null,
+                'event_type' => 'Festive',
+            ]
         ];
 
         foreach ($events as $eventData) {

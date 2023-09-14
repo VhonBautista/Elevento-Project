@@ -3,6 +3,7 @@
 namespace App\Http\Controllers;
 
 use Illuminate\Http\Request;
+use App\Models\Event;
 
 class HomeController extends Controller
 {
@@ -43,6 +44,13 @@ class HomeController extends Controller
      */
     public function adminHome()
     {
-        return view('user_admin.dashboard');
+        $campus = session('campus');
+        $events = Event::where('status', 'Pending')
+               ->where('campus', $campus)
+               ->orderBy('created_at', 'desc')
+               ->take(5)
+               ->get();
+
+        return view('user_admin.dashboard', ['events' => $events]);
     }
 }

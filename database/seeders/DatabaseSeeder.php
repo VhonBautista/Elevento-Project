@@ -28,6 +28,8 @@ class DatabaseSeeder extends Seeder
             $this->call(OrganizationSeeder::class);
             $this->call(VenueSeeder::class);
             $this->call(EventTypeSeeder::class);
+            // $this->call(UserSeeder::class);
+            $this->call(EventSeeder::class);
 
             DB::commit();
         } catch (\Exception $e) {

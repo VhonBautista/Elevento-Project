@@ -22,16 +22,18 @@ return new class extends Migration
             // fields
             $table->string('title');
             $table->text('description');
-            $table->string('cover_photo');
+            $table->string('cover_photo')->nullable();
             $table->dateTime('start_date');
             $table->dateTime('end_date');
             $table->unsignedBigInteger('creator_id'); // FK
+            $table->string('campus', 100); // FK
             $table->unsignedBigInteger('venue_id')->nullable(); // FK
             $table->string('event_type', 100); // FK
             $table->timestamps();
             
             // references
             $table->foreign('creator_id')->references('id')->on('users');
+            $table->foreign('campus')->references('campus')->on('campuses');
             $table->foreign('venue_id')->references('id')->on('venues');
             $table->foreign('event_type')->references('event_type')->on('event_types');
         });
