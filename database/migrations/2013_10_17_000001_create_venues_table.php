@@ -18,7 +18,9 @@ return new class extends Migration
             $table->enum('status', ['Active', 'Inactive'])->default('Active');
 
             // fields
-            $table->string('venue_name');
+            $table->string('venue_name', 30);
+            $table->string('handler_name', 50);
+            $table->integer('capacity');
             $table->string('image')->nullable();
             $table->string('campus', 100); // FK
             $table->timestamps();

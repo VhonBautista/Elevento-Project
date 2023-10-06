@@ -14,12 +14,12 @@ class VenueSeeder extends Seeder
     public function run(): void
     {
         $venues = [
-            ['venue_name' => 'Amphitheater', 'image' => null, 'campus' => 'Urdaneta'],
-            ['venue_name' => 'Student Activity Center', 'image' => null, 'campus' => 'Urdaneta'],
-            ['venue_name' => 'Audio Visual Room', 'image' => null, 'campus' => 'Urdaneta'],
-            ['venue_name' => 'Ground Floor Annex', 'image' => null, 'campus' => 'Urdaneta'],
-            ['venue_name' => 'Library', 'image' => null, 'campus' => 'Urdaneta'],
-            ['venue_name' => 'Covered Court', 'image' => null, 'campus' => 'Urdaneta'],
+            ['venue_name' => 'Amphitheater', 'handler_name' => 'Corazon Alabamba', 'capacity' => 300, 'image' => null, 'campus' => 'Urdaneta'],
+            ['venue_name' => 'Student Activity Center', 'handler_name' => 'Corazon Alabamba', 'capacity' => 300, 'image' => null, 'campus' => 'Urdaneta'],
+            ['venue_name' => 'Audio Visual Room', 'handler_name' => 'Corazon Alabamba', 'capacity' => 300, 'image' => null, 'campus' => 'Urdaneta'],
+            ['venue_name' => 'Ground Floor Annex', 'handler_name' => 'Corazon Alabamba', 'capacity' => 300, 'image' => null, 'campus' => 'Urdaneta'],
+            ['venue_name' => 'Library', 'handler_name' => 'Corazon Alabamba', 'capacity' => 300, 'image' => null, 'campus' => 'Urdaneta'],
+            ['venue_name' => 'Covered Court', 'handler_name' => 'Corazon Alabamba', 'capacity' => 300, 'image' => null, 'campus' => 'Urdaneta'],
         ];
 
         foreach ($venues as $venueData) {

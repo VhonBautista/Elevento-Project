@@ -4,7 +4,9 @@ namespace App\Http\Controllers;
 
 use Illuminate\Support\Facades\Hash; 
 use Illuminate\Http\Request;
+use App\Models\UpgradeRequest;
 use App\Models\CampusEntity;
+use App\Models\Department;
 use App\Models\User;
 
 class AdminManagementController extends Controller
@@ -15,8 +17,127 @@ class AdminManagementController extends Controller
         $users = User::whereHas('campusEntity', function($query) use ($campus) {
             $query->where('campus', $campus);
         })->with(['campusEntity', 'organization'])->get();
+        $departments = Department::select(
+            'department_code',
+            'department',
+            'campus',
+            )
+        ->where('campus', $campus)
+        ->orderBy('department')
+        ->get();
 
-        return view('user_admin.management', ['usersData' => $users]);
+        return view('user_admin.management', ['usersData' => $users, 'departmentsData' => $departments]);
+    }
+    
+    public function getAdmins()
+    {
+        $campus = session('campus');
+        $admins = User::select(
+            'users.id',
+            'users.user_id',
+            'users.role',
+            'users.email',
+            'users.profile_picture',
+            'users.username',
+            'users.manage_user',
+            'users.manage_venue',
+            'users.manage_campus',
+            'users.manage_event',
+            'campus_entities.department_code'
+            )
+        ->join('campus_entities', 'users.user_id', '=', 'campus_entities.user_id')
+        ->where('campus_entities.campus', $campus)
+        ->where('users.role', 'Co-Admin')
+        ->orderBy('users.username')
+        ->get();
+        
+        if ($admins) {
+            return response()->json([
+                'message' => 'Data is present.',
+                'code' => 200,
+                'data' => $admins
+            ]);
+        } else {
+            return response()->json([
+                'message' => 'Internal server error.',
+                'code' => 500
+            ]);
+        }
+    }
+
+    public function getOrganizers()
+    {
+        $campus = session('campus');
+        $organizers = User::select(
+            'users.id',
+            'users.user_id',
+            'users.email',
+            'users.profile_picture',
+            'users.username',
+            'departments.department',
+            'campus_entities.department_code',
+            'campus_entities.type'
+            )
+        ->join('campus_entities', 'users.user_id', '=', 'campus_entities.user_id')
+        ->join('departments', 'campus_entities.department_code', '=', 'departments.department_code')
+        ->where('campus_entities.campus', $campus)
+        ->where('users.role', 'Organizer')
+        ->where('campus_entities.type', 'Employee')
+        ->orderBy('users.username')
+        ->get();
+        
+        if ($organizers) {
+            return response()->json([
+                'message' => 'Data is present.',
+                'code' => 200,
+                'data' => $organizers
+            ]);
+        } else {
+            return response()->json([
+                'message' => 'Internal server error.',
+                'code' => 500
+            ]);
+        }
+    }
+
+    public function getRequests()
+    {
+        $campus = session('campus');
+        $requests = UpgradeRequest::select(
+            'requests.id',
+            'requests.status',
+            'requests.message',
+            'departments.department',
+            'organizations.organization',
+            'users.id as userId',
+            'users.user_id',
+            'users.email',
+            'users.profile_picture',
+            'users.username',
+            'campus_entities.type',
+            'campus_entities.department_code'
+            )
+        ->join('users', 'requests.user_id', '=', 'users.id')
+        ->join('campus_entities', 'users.user_id', '=', 'campus_entities.user_id')
+        ->join('departments', 'campus_entities.department_code', '=', 'departments.department_code')
+        ->join('organizations', 'requests.organization_id', '=', 'organizations.id')
+        ->where('campus_entities.campus', $campus)
+        ->where('requests.status', 'Pending')
+        ->orderBy('requests.created_at')
+        ->get();
+        
+        if ($requests) {
+            return response()->json([
+                'message' => 'Data is present.',
+                'code' => 200,
+                'data' => $requests
+            ]);
+        } else {
+            return response()->json([
+                'message' => 'Internal server error.',
+                'code' => 500,
+            ]);
+        }
     }
     
     public function getUsers()
@@ -43,6 +164,7 @@ class AdminManagementController extends Controller
                 ->orWhere('users.role', 'User')
                 ->orWhere('users.role', 'Co-Admin');
         })
+        ->orderBy('users.username')
         ->get();    
         
         if ($users->isNotEmpty()) {
@@ -60,42 +182,9 @@ class AdminManagementController extends Controller
         }
     }
 
-    public function getAdmins()
-    {
-        $campus = session('campus');
-        $admins = User::select(
-            'users.id',
-            'users.user_id',
-            'users.role',
-            'users.email',
-            'users.profile_picture',
-            'users.username',
-            'campus_entities.sex',
-            'campus_entities.type'
-            )
-        ->join('campus_entities', 'users.user_id', '=', 'campus_entities.user_id')
-        ->where('campus_entities.campus', $campus)
-        ->where('users.role', 'Co-Admin')
-        ->get();
-        
-        if ($admins) {
-            return response()->json([
-                'message' => 'Data is present.',
-                'code' => 200,
-                'data' => $admins
-            ]);
-        } else {
-            return response()->json([
-                'message' => 'Internal server error.',
-                'code' => 500
-            ]);
-        }
-    }
-
     public function getPermission(Request $request)
     {
         $user = User::where('id', $request->id)->first();
-
         if ($user){
             return response()->json([
                 'success' => true, 
@@ -132,46 +221,85 @@ class AdminManagementController extends Controller
         }
     }
 
-    public function store(Request $request)
+    public function promoteToCoAdmin(Request $request)
     {
-        $inputUserId = strtoupper(trim($request->user_id));
+        $user = User::where('id', $request->id)->update([
+            'role' => 'Co-Admin'
+        ]);     
 
-        $campusEntity = CampusEntity::where('user_id', $inputUserId)->first();
-
-        if (!$campusEntity) {
-            return response()->json(['validate' => 'Ensure that you belong to PSU and that your user ID is valid.']);
-        }
-
-        $existingUser = User::where('user_id', $inputUserId)->first();
-
-        if ($existingUser) {
-            return response()->json(['validate' => 'User ID already has an existing account.']);
-        }
-
-        $existingEmail = User::where('email', $request->email)->first();
-
-        if ($existingEmail) {
-            return response()->json(['validate' => 'Email has already been taken. Please choose a different one.']);
-        }
-        
-        $username = ucfirst(strtolower($campusEntity->firstname));
-
-        $user = new User; 
-        $user->role = 'Co-Admin';
-        $user->user_id = $inputUserId;
-        $user->username = $username;
-        $user->email = $request->email;
-        $user->password = Hash::make($request->password);
-        $user->manage_user = $request->has('manage_user') ? 1 : 0;
-        $user->manage_venue = $request->has('manage_venue') ? 1 : 0;
-        $user->manage_campus = $request->has('manage_campus') ? 1 : 0;
-        $user->manage_event = $request->has('manage_event') ? 1 : 0;
-
-        $result = $user->save();
-        
-        if($result) {
+        if($user) {
             return response()->json([
-                'success' => 'A new co-administrator has been successfully added.',
+                'success' => true,
+                'code' => 200
+            ]);
+        } else {
+            return response()->json([
+                'error' => 'Internal server error.',
+                'code' => 500
+            ]);
+        }
+    }
+
+    public function promoteToOrganizer(Request $request)
+    {
+        $updateRequest = UpgradeRequest::where('id', $request->id)->update([
+            'status' => 'Active'
+        ]);  
+        
+        $user = User::where('id', $request->userId)->update([
+            'role' => 'Organizer'
+        ]);     
+
+        if($updateRequest && $user) {
+            return response()->json([
+                'success' => true,
+                'code' => 200,
+                'user' => $request->userId,
+                'request' => $request->id
+            ]);
+        } else {
+            return response()->json([
+                'error' => 'Internal server error.',
+                'code' => 500,
+                'user' => $request->userId,
+                'request' => $request->id
+            ]);
+        }
+    }
+
+    public function rejectRequest(Request $request)
+    {
+        $rejected = UpgradeRequest::where('id', $request->rejected_id)->update([
+            'status' => 'Inactive',
+            'message' => $request->message
+        ]);     
+
+        if($rejected) {
+            return response()->json([
+                'success' => 'A new venue has been successfully added.',
+                'code' => 200
+            ]);
+        } else {
+            return response()->json([
+                'error' => 'Internal server error.',
+                'code' => 500
+            ]);
+        }
+    }
+
+    public function demote(Request $request)
+    {
+        $user = User::where('id', $request->id)->update([
+            'role' => 'Organizer',
+            'manage_user' => 0,
+            'manage_venue' => 0,
+            'manage_campus' => 0,
+            'manage_event' => 0
+        ]);     
+
+        if($user) {
+            return response()->json([
+                'success' => true,
                 'code' => 200
             ]);
         } else {

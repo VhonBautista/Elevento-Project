@@ -2,7 +2,7 @@
 
 @section('content')
 <div class="side-menu">
-<div class="sidebar">
+    <div class="sidebar">
         <div class="logo-content">
             <div class="logo">
                 <i class="fa-solid fa-qrcode"></i>
@@ -18,15 +18,27 @@
                 </a>
             </li>
             <li>
-                <a href="{{ route('admin.management') }}">
-                    <i class="fa-solid fa-toolbox"></i>
-                    <span class="side-link-name">Management</span>
+                <a href="">
+                    <i class="fa-solid fa-folder-open"></i>
+                    <span class="side-link-name">Projects</span>
                 </a>
             </li>
             <li>
                 <a href="">
                     <i class="fa-solid fa-calendar-days"></i>
-                    <span class="side-link-name">Events</span>
+                    <span class="side-link-name">Event Approvals</span>
+                </a>
+            </li>
+            <!-- <li>
+                <a href="">
+                    <i class="fa-solid fa-calendar-days"></i>
+                    <span class="side-link-name">Tasks</span>
+                </a>
+            </li> -->
+            <li>
+                <a href="{{ route('admin.management') }}">
+                    <i class="fa-solid fa-toolbox"></i>
+                    <span class="side-link-name">Utilities</span>
                 </a>
             </li>
             <li>
@@ -116,15 +128,15 @@
         <div class="container-fluid px-4 p-2">
             <ul class="nav nav-tabs pt-2" id="myTab" role="tablist">
                 <li class="nav-item" role="presentation">
-                    <button class="nav-link active" id="dashboard-tab" data-bs-toggle="tab" data-bs-target="#dashboard" type="button" role="tab" aria-controls="dashboard" aria-selected="true">Dashboard</button>
+                    <button class="nav-link dash-tab active" id="dashboard-tab" data-bs-toggle="tab" data-bs-target="#dashboard-tab-content" type="button" role="tab" aria-controls="dashboard-tab-content" aria-selected="true">Dashboard</button>
                 </li>
                 <li class="nav-item" role="presentation">
-                    <button class="nav-link" id="analytics-tab" data-bs-toggle="tab" data-bs-target="#analytics" type="button" role="tab" aria-controls="analytics" aria-selected="false">Analytics</button>
+                    <button class="nav-link dash-tab" id="analytics-tab" data-bs-toggle="tab" data-bs-target="#analytics-tab-content" type="button" role="tab" aria-controls="analytics-tab-content" aria-selected="false">Analytics</button>
                 </li>
             </ul>
 
             <div class="tab-content" id="myTabContent">
-                <div class="tab-pane fade p-2 show active" id="dashboard" role="tabpanel" aria-labelledby="dashboard-tab">
+                <div class="tab-pane fade p-2 show active" id="dashboard-tab-content" role="tabpanel" aria-labelledby="dashboard-tab-content">
                     <div class="row flex-lg-nowrap mt-2">
                         <div class="col">
                             <div class="row">
@@ -173,9 +185,6 @@
 
                                 <div class="col-md-4">
 
-                                    <div class="alert alert-danger d-none" role="alert" id="weather-error">
-                                        <div id="weather-message"></div>
-                                    </div>
                                     <span class="m-0 text fw-normal">{{ __('Weather Today') }}</span>
                                     <div class="weather-data mb-0 mt-2">
                                         <div class="current-weather mb-2" style="box-shadow: 3px 3px 4px #888888;">
@@ -200,9 +209,12 @@
                                                 </p> 
                                             </div>
                                         </div>
-                                        <div class="weather-input mb-3">
-                                            <input class="city-input" type="text" placeholder="Search for a city" value="{{ session('campus') }}">
-                                            <button class="search-btn">Search</button>
+                                        <div class="alert alert-danger d-none" role="alert" id="weather-error">
+                                            <div id="weather-message"></div>
+                                        </div>
+                                        <div class="input-group mb-3 mt-3">
+                                            <input type="text" class="form-control city-input" placeholder="Search for a city" value="{{ session('campus') }}" aria-describedby="button-addon2">
+                                            <button class="btn search-btn btn-primary text-light" type="button" id="button-addon2">Search</button>
                                         </div>
                                         <div class="days-forecast">
                                             <span class="m-0 text-1 fw-normal">{{ __('5 Day Forecast') }}</span>
@@ -236,7 +248,7 @@
                                         </div>
                                     </div>
                                    
-                                    <span class="m-0 text-1 fw-normal">{{ __('Pending Events') }}</span>
+                                    <span class="m-0 text-1 fw-normal">{{ __('Events Awaiting Approval') }}</span>
                                     <div class="d-flex justify-content-center align-items-center p-5" id="pending-event-loader">
                                         <div class="spinner-border text-primary" role="status">
                                             <span class="visually-hidden">Loading...</span>
@@ -278,7 +290,7 @@
                     </div>
                 </div>
 
-                <div class="tab-pane fade p-2" id="analytics" role="tabpanel" aria-labelledby="analytics-tab">
+                <div class="tab-pane fade p-2" id="analytics-tab-content" role="tabpanel" aria-labelledby="analytics-tab-content">
                     <span class="text">Analytics</span>
 
                     <!-- 4 cards -->
@@ -286,15 +298,6 @@
                         <div class="col-xl-3 col-md-6">
                             <div class="card bg-primary text-white mb-4">
                                 <div class="card-body">Primary Card</div>
-                                <div class="card-footer d-flex align-items-center justify-content-between">
-                                    <a class="small text-white stretched-link" href="#">View Details</a>
-                                    <div class="small text-white"><i class="fas fa-angle-right"></i></div>
-                                </div>
-                            </div>
-                        </div>
-                        <div class="col-xl-3 col-md-6">
-                            <div class="card bg-warning text-white mb-4">
-                                <div class="card-body">Warning Card</div>
                                 <div class="card-footer d-flex align-items-center justify-content-between">
                                     <a class="small text-white stretched-link" href="#">View Details</a>
                                     <div class="small text-white"><i class="fas fa-angle-right"></i></div>
@@ -393,7 +396,8 @@
       }]
     },
     options: {
-      scales: {
+        maintainAspectRatio: false,
+        scales: {
         y: {
           beginAtZero: true
         }
@@ -412,6 +416,7 @@
       }]
     },
     options: {
+        maintainAspectRatio: false,
       scales: {
         y: {
           beginAtZero: true
@@ -424,11 +429,27 @@
     $(document).ready(function() {
         let menubtn = $("#menu-btn");
         let sidebar = $(".sidebar");
+        
         let isSidebarActive = getCookie("sidebarActive") === "true";
-
         if (isSidebarActive) {
             sidebar.addClass("active-sidebar");
         }
+
+        let lastActiveTab = getCookie("activeTabDash");
+        if (lastActiveTab) {
+            $('.dash-tab').removeClass('active');
+            $(`#${lastActiveTab}`).addClass('active');
+            $('.tab-pane').removeClass('show active');
+            $(`#${lastActiveTab}-content`).addClass('show active');
+        }
+
+        $('.dash-tab').click(function() {
+            let activeTabId = $(this).attr('id');
+            setCookie("activeTabDash", activeTabId, 4);
+            let activeContentId = `${activeTabId}-content`;
+            $('.tab-pane').removeClass('show active');
+            $(`#${activeContentId}`).addClass('show active');
+        });
 
         menubtn.click(function() {
             sidebar.toggleClass("active-sidebar");

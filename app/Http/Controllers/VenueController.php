@@ -14,10 +14,13 @@ class VenueController extends Controller
             'id',
             'image',
             'venue_name',
+            'handler_name',
+            'capacity',
             'campus',
             'status'
             )
         ->where('campus', $campus)
+        ->orderBy('updated_at', 'desc')
         ->get();
         
         if ($venues) {
@@ -67,6 +70,8 @@ class VenueController extends Controller
 
         $venue = Venue::where('id', $request->selected_venue_id)->update([
             'venue_name' => $request->update_venue,
+            'handler_name' => $request->update_handler,
+            'capacity' => $request->update_capacity,
             'image' => $fileName
         ]);        
 
@@ -114,6 +119,8 @@ class VenueController extends Controller
 
         $campus = session('campus');
         $venueInput = ucwords(trim($request->venue));
+        $handlerInput = ucwords(trim($request->handler));
+        $capacityInput = $request->capacity;
 
         if (!$venueInput) {
             return response()->json(['validate' => 'Venue name field is required.']);
@@ -130,6 +137,8 @@ class VenueController extends Controller
         
         $venue = new Venue; 
         $venue->venue_name = $venueInput;
+        $venue->handler_name = $handlerInput;
+        $venue->capacity = $capacityInput;
         $venue->image = $fileName;
         $venue->campus = $campus;
 

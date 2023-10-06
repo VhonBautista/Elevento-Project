@@ -14,21 +14,10 @@
         <ul class="nav-list">
             @if ( $user->role == "Organizer" )
             <li>
-                <a href="">
+                <!-- todo: organizer home -->
+                <a href="{{ route('admin.dashboard') }}">
                     <i class="fa-solid fa-gauge"></i>
                     <span class="side-link-name">Home</span>
-                </a>
-            </li>
-            <li>
-                <a href="">
-                    <i class="fa-solid fa-toolbox"></i>
-                    <span class="side-link-name">Tasks</span>
-                </a>
-            </li>
-            <li>
-                <a href="">
-                    <i class="fa-solid fa-calendar-days"></i>
-                    <span class="side-link-name">Events</span>
                 </a>
             </li>
             @else
@@ -38,16 +27,30 @@
                     <span class="side-link-name">Home</span>
                 </a>
             </li>
+            @endif
             <li>
-                <a href="{{ route('admin.management') }}">
-                    <i class="fa-solid fa-toolbox"></i>
-                    <span class="side-link-name">Management</span>
+                <a href="">
+                    <i class="fa-solid fa-folder-open"></i>
+                    <span class="side-link-name">Projects</span>
                 </a>
             </li>
+            <!-- <li>
+                <a href="">
+                    <i class="fa-solid fa-calendar-days"></i>
+                    <span class="side-link-name">Tasks</span>
+                </a>
+            </li> -->
+            @if ( $user->role != "Organizer" )
             <li>
                 <a href="">
                     <i class="fa-solid fa-calendar-days"></i>
-                    <span class="side-link-name">Events</span>
+                    <span class="side-link-name">Event Approvals</span>
+                </a>
+            </li>
+            <li>
+                <a href="{{ route('admin.management') }}">
+                    <i class="fa-solid fa-toolbox"></i>
+                    <span class="side-link-name">Utilities</span>
                 </a>
             </li>
             @endif
@@ -175,7 +178,7 @@
                         <li class="nav-item dropdown">
                             <a class="nav-link dropdown-toggle p-0" role="button" data-bs-toggle="dropdown" aria-expanded="false">
                                 <div class="btn btn-primary rounded-pill" style="border: 2px solid #fff">
-                                    <img src="{{ asset($user->profile_picture) }}" class="me-1" style="width:22px; height:22px; border-radius: 50%;" alt="Avatar">
+                                    <img src="@if (Auth::user()->profile_picture == null) {{ asset('asset/blank_profile.jpg') }} @else {{ asset(Auth::user()->profile_picture) }} @endif" class="me-1" style="width:22px; height:22px; border-radius: 50%;" alt="Avatar">
                                     {{ ucfirst(Auth::user()->username) }}
                                 </div>
                             </a>
@@ -183,6 +186,9 @@
                                 <li><a class="dropdown-item" href="{{ route('profile.edit', ['id' => Auth::user()->id]) }}">Settings</a></li>
                                 <li><hr class="dropdown-divider"></li>
                                 <li><a class="dropdown-item" href="{{ route('logout') }}" onclick="event.preventDefault(); document.getElementById('logout-form').submit();">Logout</a></li>
+                                <form id="logout-form" action="{{ route('logout') }}" method="POST" class="d-none">
+                                    @csrf
+                                </form>
                             </ul>
                         </li>
                     </ul>
@@ -243,7 +249,8 @@
                                                     <div class="modal fade" id="changePhotoModal" tabindex="-1" aria-labelledby="changePhotoModalLabel" aria-hidden="true">
                                                         <div class="modal-dialog">
                                                             <div class="modal-content">
-                                                                <div class="modal-header bg-primary">
+                                                                <div class="modal-header bg-primary" style="padding: 6px 18px;">
+                                                                    <i class="fa-solid text-light me-2 fa-camera"></i>
                                                                     <h4 class="text-light m-0 modal-title fs-5">Change Photo</h4>
                                                                     <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
                                                                 </div>
@@ -449,6 +456,11 @@
                                             <div>{{ session('success-request') }}</div>
                                             <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
                                         </div>
+                                        @elseif (session('existing-request'))
+                                        <div class="alert alert-danger alert-dismissible" role="alert">
+                                            <div>{{ session('existing-request') }}</div>
+                                            <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+                                        </div>
                                         @endif
                                         <span class="m-0 text-1">{{ __('Join Us') }}</span>
                                         <p class="card-text">Join organizations and help us create exciting events!</p>
@@ -464,11 +476,12 @@
                                     </div>
                                 </div>
 
-                                <!-- modal -->
+                                <!-- send request form modal -->
                                 <div class="modal fade" id="requestModal" tabindex="-1" aria-labelledby="requestModalLabel" aria-hidden="true">
                                     <div class="modal-dialog">
                                         <div class="modal-content">
-                                            <div class="modal-header bg-primary">
+                                            <div class="modal-header bg-primary" style="padding: 6px 18px;">
+                                                <i class="fa-solid text-light me-2 fa-up-long"></i>     
                                                 <h4 class="text-light m-0 modal-title">Become an Organizer</h4>
                                                 <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
                                             </div>

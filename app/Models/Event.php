@@ -12,6 +12,7 @@ class Event extends Model
     protected $table = 'events';
 
     protected $fillable = [
+        'status',
         'register',
         'hearts',
         'title',
@@ -20,6 +21,7 @@ class Event extends Model
         'start_date',
         'end_date',
         'creator_id',
+        'campus',
         'venue_id',
         'event_type',
     ];

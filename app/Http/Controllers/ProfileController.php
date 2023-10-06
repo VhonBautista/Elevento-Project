@@ -113,13 +113,19 @@ class ProfileController extends Controller
 
     public function createRequest(Request $request)
     {
+        $id = Auth::id();
+        $organization = $request->input('organization');
+
+        $existingRequest = UpgradeRequest::where('user_id', $id)->exists();
+
+        if ($existingRequest) {
+            return redirect()->back()->with(['existing-request' => 'You can only send one request at a time. Please wait until the admin reviews your request.']);
+        }
+
         $request->validate([
             'organization' => 'required',
         ]);
 
-        $id = Auth::id();
-        $organization = $request->input('organization');
-        
         UpgradeRequest::create([
             'user_id' => $id,
             'organization_id' => $organization,
