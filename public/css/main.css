@@ -641,7 +641,7 @@ input[type="file"]{
   width: 85% !important;
 }
 .dataTables_wrapper.no-footer .dataTables_scrollBody {
-  height: 320px !important;
+  height: 430px !important;
   border-bottom: none !important;
   overflow-y: scroll;
 }

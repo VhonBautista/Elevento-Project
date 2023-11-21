@@ -61,4 +61,19 @@ class User extends Authenticatable
     {
         return $this->belongsTo(Organization::class);
     }
+
+    public function projects()
+    {
+        return $this->hasMany(Project::class);
+    }
+
+    public function planningLog()
+    {
+        return $this->hasOne(PlanningLog::class);
+    }
+
+    public function createdEvents()
+    {
+        return $this->hasMany(Event::class, 'creator_id');
+    }
 }

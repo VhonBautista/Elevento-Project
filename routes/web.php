@@ -7,6 +7,11 @@ use App\Http\Controllers\VenueController;
 use App\Http\Controllers\Auth\RegisterController;
 use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\EntityController;
+use App\Http\Controllers\ApprovalController;
+use App\Http\Controllers\ProjectController;
+use App\Http\Controllers\PlanController;
+use App\Http\Controllers\PreviewController;
+use Illuminate\Support\Facades\Auth;
 
 /*
 |--------------------------------------------------------------------------
@@ -32,6 +37,17 @@ Route::post('/register', [RegisterController::class, 'register'])->name('registe
 Route::middleware(['auth', 'user-access:Admin'])->group(function (){
     Route::get('/admin/dashboard', [HomeController::class, 'adminHome'])->name('admin.dashboard');
     Route::get('/admin/management', [AdminManagementController::class, 'index'])->name('admin.management');
+    Route::get('/getVenues/{campus}', [HomeController::class, 'getVenues']);
+    Route::post('/admin/create-event', [AdminManagementController::class, 'store'])->name('admin.store_event');
+
+    Route::get('/get-updated-event-counts', [ApprovalController::class, 'getUpdatedEventCounts'])->name('getUpdatedEventCounts');
+    Route::get('/admin/approval', [ApprovalController::class, 'index'])->name('admin.approval');
+    Route::get('/admin/get-events-approval', [ApprovalController::class, 'getApprovals']);
+    Route::get('/admin/get-events-rejected', [ApprovalController::class, 'getRejected']);
+    Route::post('/accept-event', [ApprovalController::class, 'acceptEvent']);
+    Route::post('/reject-event', [ApprovalController::class, 'rejectEvent']);
+    Route::post('/destroy-event', [ApprovalController::class, 'destroy']);
+    Route::get('/admin/approval', [ApprovalController::class, 'index'])->name('admin.approval');
     
     Route::post('/demote-admin', [AdminManagementController::class, 'demote']);
     Route::get('/admin/get-admins', [AdminManagementController::class, 'getAdmins']);
@@ -46,8 +62,6 @@ Route::middleware(['auth', 'user-access:Admin'])->group(function (){
     Route::get('/admin/get-requests', [AdminManagementController::class, 'getRequests']);
     Route::post('/promote-to-organizer', [AdminManagementController::class, 'promoteToOrganizer']);
     Route::post('/reject/request', [AdminManagementController::class, 'rejectRequest']);
-    // Route::post('/upload', [PdfFileController::class, 'upload']);
-    // Route::get('/download/{id}', [PdfFileController::class, 'download']);
     
     Route::get('/admin/get-venues', [VenueController::class, 'getVenues']);
     Route::post('/get-selected-venue', [VenueController::class, 'getSelectedVenue']);
@@ -73,6 +87,34 @@ Route::middleware(['auth', 'user-access:Admin'])->group(function (){
     Route::post('/update-organization', [EntityController::class, 'updateOrganization']);
     Route::post('/delete-organization', [EntityController::class, 'destroyOrganization']);
     Route::post('/admin/create-organization', [EntityController::class, 'storeOrganization'])->name('admin.store_organization');
+
+
+    // admin and event organizers
+    Route::get('/projects', [ProjectController::class, 'index'])->name('projects');
+
+    // /admin/preview/{?}
+    Route::get('/preview', [PreviewController::class, 'index'])->name('preview');
+
+    Route::get('/events/plan/{eventId?}', [PlanController::class, 'index'])->name('plan');
+    Route::put('/events/{event}/update-description', [PlanController::class, 'updateDescription'])
+    ->name('update.description');
+    Route::put('/events/{event}/update-status', [PlanController::class, 'updateStatus'])
+    ->name('update.status');
+    Route::post('/events/reschedule', [PlanController::class, 'reschedule'])
+    ->name('request.schedule');
+    Route::post('/delete-event', [PlanController::class, 'deleteEvent'])->name('delete.event');
+    Route::post('/add-flow', [PlanController::class, 'addFlow'])->name('event.add-flow');
+    Route::post('/update-event-flow', [PlanController::class, 'updateFlow'])->name('event.update-flow');
+    Route::delete('/delete-flow/{eventId}/{segmentId}/{flowId}', [PlanController::class, 'deleteFlow'])->name('event.delete-flow');
+    Route::post('/add-person', [PlanController::class, 'addPerson'])->name('event.add-person');
+    Route::post('/update-event-person', [PlanController::class, 'updatePerson'])->name('event.update-person');
+    Route::delete('/delete-person/{eventId}/{personId}', [PlanController::class, 'deletePerson'])->name('event.delete-person');
+
+
+
+    Route::get('/admin/analytics/{eventId?}', [PlanController::class, 'analytics'])->name('analytics');
+
+    Route::get('/admin/attendance/{eventId?}', [PlanController::class, 'attendance'])->name('attendance');
 });
 
 Route::middleware(['auth', 'user-access:Co-Admin'])->group(function (){
@@ -82,6 +124,7 @@ Route::middleware(['auth', 'user-access:Co-Admin'])->group(function (){
 
 Route::middleware(['auth', 'user-access:Organizer'])->group(function (){
     Route::get('/organizer/home', [HomeController::class, 'organizerHome'])->name('organizer.home');
+    
 });
 
 Route::middleware(['auth', 'user-access:User'])->group(function (){
@@ -96,4 +139,8 @@ Route::middleware('auth')->group(function () {
     Route::post('/profile/request', [ProfileController::class, 'createRequest'])->name('profile.request');
 
     Route::post('/events-feed', [AdminManagementController::class, 'getEvents'])->name('calendar.events');
+    
+    // Notification
+    Route::post('/mark-read', [AdminManagementController::class, 'markRead'])->name('notification.read');
 });
+

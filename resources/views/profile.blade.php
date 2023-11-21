@@ -1,5 +1,10 @@
 @extends('layouts.app')
 
+@php
+use Carbon\Carbon;
+$user = Auth::user();    
+@endphp
+
 @section('content')
 @if ( $user->role != "User" )
 <div class="side-menu">
@@ -29,7 +34,7 @@
             </li>
             @endif
             <li>
-                <a href="">
+                <a href="{{ route('projects') }}">
                     <i class="fa-solid fa-folder-open"></i>
                     <span class="side-link-name">Projects</span>
                 </a>
@@ -41,12 +46,14 @@
                 </a>
             </li> -->
             @if ( $user->role != "Organizer" )
+            @if (($user->role == 'Co-Admin' && $user->manage_event == 1) || $user->role == 'Admin')
             <li>
-                <a href="">
+                <a href="{{ route('admin.approval') }}">
                     <i class="fa-solid fa-calendar-days"></i>
                     <span class="side-link-name">Event Approvals</span>
                 </a>
             </li>
+            @endif
             <li>
                 <a href="{{ route('admin.management') }}">
                     <i class="fa-solid fa-toolbox"></i>
@@ -105,19 +112,55 @@
                 </div>
             </li>
             <div class="d-flex">
-                <li class="nav-item mx-3">
-                    <a href="#" class="btn btn-primary rounded-pill">
-                        <i class="fa-solid fa-globe mx-1"></i>
+                <li class="nav-item me-2">
+                    <a href="#" class="btn btn-primary px-4 rounded-pill mx-1">
+                        <i class="fa-solid fa-globe me-2"></i>
                         Explore Events
                     </a>
                 </li>
                 <li class="nav-item ">
-                    <button type="button" class="btn btn-primary rounded-pill position-relative">
-                        <i class="fa-regular fa-bell"></i>
-                        <span class="position-absolute notification start-100 translate-middle badge rounded-pill bg-danger">
-                            0
-                        </span>
-                    </button>
+                    <div class="dropdown">
+                        <button class="btn btn-primary rounded-pill position-relative dropdown-toggle" type="button" data-bs-toggle="dropdown" aria-expanded="false">
+                            <i class="fa-regular fa-bell"></i>
+                            @if ($user->unreadNotifications->isNotEmpty())
+                            <span class="position-absolute notification start-100 translate-middle badge rounded-pill bg-danger" style="height: 14px; width: 14px;">
+                            </span>
+                            @endif
+                        </button>
+                        <div class="dropdown-menu" style="max-height: 410px; overflow-y: auto;">
+                            <h6 class="fw-bold py-1 text-center" style="font-size: 16px">Notifications</h6>
+                            <hr class="m-0">
+                            @forelse($user->unreadNotifications as $notification)
+                                {{-- Notification Item --}}
+                                <a class="dropdown-item mark-as-read" href="{{ url($notification->data['url']) }}" data-id="{{ $notification->id }}">
+                                    <div class="d-flex align-items-center p-2" style="width: 365px">
+                                        <div class="me-4">
+                                            <!-- icon -->
+                                            icon
+                                        </div>
+                                        <div class="w-100">
+                                            <div class="d-flex justify-content-between align-items-center">
+                                                <p class="fw-bold m-0" style="font-size: 16px">{{ $notification->data['title'] }}</p>
+                                                <p class="fw-bold small m-0">{{ Carbon::parse($notification->created_at)->format('h:i A') }}</p>
+                                            </div>
+                                            <div class="row">
+                                                <div class="col">
+                                                    <p class="text-secondary small m-0">{{ $notification->data['message'] }}</p>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </a>
+                                {{-- Notification Item End --}}
+                            @empty
+                                <div class="d-flex justify-content-center align-items-center" style="width: 365px">
+                                    <div class="p-4">
+                                        {{ __('There are no new notifications') }}
+                                    </div>
+                                </div>
+                            @endforelse
+                        </div>
+                    </div>
                 </li>
                 <li class="nav-item dropdown">
                     <a class="nav-link p-0 px-3 rounded-pill dropdown-toggle d-flex align-items-center" href="#" id="navbarDropdown" role="button" data-bs-toggle="dropdown" aria-expanded="false">

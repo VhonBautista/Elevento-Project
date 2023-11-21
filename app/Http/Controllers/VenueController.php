@@ -128,7 +128,6 @@ class VenueController extends Controller
         
         $photo = $request->file('photo_venue');
         $fileName = null;
-
         if ($photo) {
             $fileName = time() . '.' . $photo->getClientOriginalExtension();
             $photo->move(public_path('venue'), $fileName);

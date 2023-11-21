@@ -29,6 +29,7 @@ return new class extends Migration
             $table->string('campus', 100); // FK
             $table->unsignedBigInteger('venue_id')->nullable(); // FK
             $table->string('event_type', 100); // FK
+            $table->string('target_audience');
             $table->timestamps();
             
             // references

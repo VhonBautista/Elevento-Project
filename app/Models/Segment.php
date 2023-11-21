@@ -5,23 +5,22 @@ namespace App\Models;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 
-class Venue extends Model
+class Segment extends Model
 {
     use HasFactory;
 
-    protected $table = 'venues';
-
     protected $fillable = [
-        'venue_name',
-        'handler_name',
-        'capacity',
-        'image',
-        'campus',
-        'status',
+        'event_id',
+        'date',
     ];
 
     public function event()
     {
-        return $this->hasOne(Event::class);
+        return $this->belongsTo(Event::class);
+    }
+
+    public function flows()
+    {
+        return $this->hasMany(Flow::class);
     }
 }

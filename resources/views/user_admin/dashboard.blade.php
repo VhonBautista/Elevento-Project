@@ -1,5 +1,10 @@
 @extends('layouts.app')
 
+@php
+use Carbon\Carbon;
+$user = Auth::user();
+@endphp
+
 @section('content')
 <div class="side-menu">
     <div class="sidebar">
@@ -18,17 +23,19 @@
                 </a>
             </li>
             <li>
-                <a href="">
+                <a href="{{ route('projects') }}">
                     <i class="fa-solid fa-folder-open"></i>
                     <span class="side-link-name">Projects</span>
                 </a>
             </li>
+            @if (($user->role == 'Co-Admin' && $user->manage_event == 1) || $user->role == 'Admin')
             <li>
-                <a href="">
+                <a href="{{ route('admin.approval') }}">
                     <i class="fa-solid fa-calendar-days"></i>
                     <span class="side-link-name">Event Approvals</span>
                 </a>
             </li>
+            @endif
             <!-- <li>
                 <a href="">
                     <i class="fa-solid fa-calendar-days"></i>
@@ -90,19 +97,60 @@
                 </div>
             </li>
             <div class="d-flex">
-                <li class="nav-item mx-3">
-                    <a href="#" class="btn btn-primary rounded-pill">
-                        <i class="fa-solid fa-globe mx-1"></i>
+                <li class="nav-item me-2">
+                    <button type="button" id="create-event-btn" class="btn px-4 btn-primary rounded-pill mx-1">
+                        <i class="fa-solid me-2 fa-calendar-plus"></i>
+                        Create Event
+                    </button>
+                    <a href="#" class="btn btn-primary px-4 rounded-pill mx-1">
+                        <i class="fa-solid fa-globe me-2"></i>
                         Explore Events
                     </a>
                 </li>
+
                 <li class="nav-item ">
-                    <button type="button" class="btn btn-primary rounded-pill position-relative">
-                        <i class="fa-regular fa-bell"></i>
-                        <span class="position-absolute notification start-100 translate-middle badge rounded-pill bg-danger">
-                            0
-                        </span>
-                    </button>
+                    <div class="dropdown">
+                        <button class="btn btn-primary rounded-pill position-relative dropdown-toggle" type="button" data-bs-toggle="dropdown" aria-expanded="false">
+                            <i class="fa-regular fa-bell"></i>
+                            @if ($user->unreadNotifications->isNotEmpty())
+                            <span class="position-absolute notification start-100 translate-middle badge rounded-pill bg-danger" style="height: 14px; width: 14px;">
+                            </span>
+                            @endif
+                        </button>
+                        <div class="dropdown-menu" style="max-height: 410px; overflow-y: auto;">
+                            <h6 class="fw-bold py-1 text-center" style="font-size: 16px">Notifications</h6>
+                            <hr class="m-0">
+                            @forelse($user->unreadNotifications as $notification)
+                                {{-- Notification Item --}}
+                                <a class="dropdown-item mark-as-read" href="{{ url($notification->data['url']) }}" data-id="{{ $notification->id }}">
+                                    <div class="d-flex align-items-center p-2" style="width: 365px">
+                                        <div class="me-4">
+                                            <!-- icon -->
+                                            icon
+                                        </div>
+                                        <div class="w-100">
+                                            <div class="d-flex justify-content-between align-items-center">
+                                                <p class="fw-bold m-0" style="font-size: 16px">{{ $notification->data['title'] }}</p>
+                                                <p class="fw-bold small m-0">{{ Carbon::parse($notification->created_at)->format('h:i A') }}</p>
+                                            </div>
+                                            <div class="row">
+                                                <div class="col">
+                                                    <p class="text-secondary small m-0">{{ $notification->data['message'] }}</p>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </a>
+                                {{-- Notification Item End --}}
+                            @empty
+                                <div class="d-flex justify-content-center align-items-center" style="width: 365px">
+                                    <div class="p-4">
+                                        {{ __('There are no new notifications') }}
+                                    </div>
+                                </div>
+                            @endforelse
+                        </div>
+                    </div>
                 </li>
                 <li class="nav-item dropdown">
                     <a class="nav-link p-0 px-3 rounded-pill dropdown-toggle d-flex align-items-center" href="#" id="navbarDropdown" role="button" data-bs-toggle="dropdown" aria-expanded="false">
@@ -141,7 +189,7 @@
                         <div class="col">
                             <div class="row">
                                 <div class="col-md-8 mb-3">
-
+                                    @if ($user->role == 'Admin')
                                     <span class="m-0 text fw-normal">{{ __('Happening Today') }}</span>
                                     <div id="carouselExampleCaptions" class="carousel mt-2 mb-4 slide" data-bs-ride="carousel">
                                         <div class="carousel-indicators">
@@ -169,7 +217,8 @@
                                             <span class="visually-hidden">Next</span>
                                         </button>
                                     </div>
-                                    
+                                    @endif
+
                                     <div class="card p-2">
                                         <div class="d-flex justify-content-center align-items-center p-5" id="calendar-event-loader">
                                             <div class="spinner-border text-primary" role="status">
@@ -178,6 +227,86 @@
                                         </div>
                                         <div class="card-body">
                                             <div id="calendar" class="d-none"></div>
+                                        </div>
+                                    </div>
+
+                                    <!-- Calendar modal -->
+                                    <div class="modal fade" id="calendarModal" tabindex="-1" aria-labelledby="calendarModalLabel" aria-hidden="true">
+                                        <div class="modal-dialog">
+                                            <div class="modal-content">
+                                                <div class="modal-header bg-primary" style="padding: 6px 18px;">
+                                                    <i class="fa-solid me-2 fa-calendar-days text-light"></i>
+                                                    <h5 class="text-light m-0 modal-title">Create Event</h5>
+                                                    <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
+                                                </div>
+                                                <div class="modal-body">
+                                                    <form id="create-event-form" class="row px-2 g-3 pt-2">
+                                                    @csrf
+                                                    
+                                                        <div class="col-md-12">
+                                                            <label for="event-title" class="form-label">Title</label>
+                                                            <input type="text" class="form-control" id="event-title" placeholder="Enter event title" name="event_title">
+                                                            <div id="event-title-error" class="form-error mt-2 text-danger small d-none"></div>
+                                                        </div>
+
+                                                        <div class="col-md-6">
+                                                            <label for="event-start" class="form-label">Start</label>
+                                                            <input type="date" class="form-control" id="event-start" name="event_start">
+                                                            <div id="event-start-error" class="form-error mt-2 text-danger small d-none"></div>
+                                                        </div>
+
+                                                        <div class="col-md-6">
+                                                            <label for="event-end" class="form-label">End</label>
+                                                            <input type="date" class="form-control" id="event-end" name="event_end">
+                                                            <div id="event-end-error" class="form-error mt-2 text-danger small d-none"></div>
+                                                        </div>
+
+                                                        <div class="col-md-12">
+                                                            <small class="form-text text-muted">Note: Please set the end date to be at least one day after the actual end date of the event. For example, if the event starts on July 20, set the end date to July 21 or later to ensure accurate scheduling.</small>
+                                                        </div>
+
+                                                        <div class="col-md-12">
+                                                            <hr class="m-0 mb-2">
+                                                            <label for="event-type" class="form-label">Type</label>
+                                                            <select class="form-select" id="event-type" name="entity_type">
+                                                                <option value="" selected>Select Type</option>
+                                                                @foreach ($eventTypes as $eventType)
+                                                                <option value="{{ $eventType->event_type }}"> {{ $eventType->event_type }}</option>
+                                                                @endforeach
+                                                            </select>
+                                                            <div id="event-type-error" class="form-error mt-2 text-danger small d-none"></div>
+                                                        </div>
+
+                                                        <div class="col-md-12">
+                                                            <label for="target-audience" class="form-label">Target Audience</label>
+                                                            <select class="form-select" id="target-audience" name="target_audience">
+                                                                <option value="all" selected>All</option>
+                                                                <option value="student">Student</option>
+                                                                <option value="faculty">Faculty</option>
+                                                            </select>
+                                                            <div id="target-audience-error" class="form-error mt-2 text-danger small d-none"></div>
+                                                        </div>
+
+                                                        <div class="col-md-12">
+                                                            <label for="venue" class="form-label">Venue</label>
+                                                            <select class="form-select" id="campus" name="campus">
+                                                                <option value="" selected>Select Campus</option>
+                                                                @foreach ($campuses as $campus)
+                                                                <option value="{{ $campus->campus }}"> {{ $campus->campus }}</option>
+                                                                @endforeach
+                                                            </select>
+
+                                                            <select class="form-select mt-3 d-none" id="venue" name="venue"></select>
+                                                            
+                                                            <div id="venue-error" class="form-error mt-2 text-danger small d-none"></div>
+                                                        </div>
+                                                    </div>
+                                                    <div class="modal-footer">
+                                                        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+                                                        <button type="submit" class="btn btn-primary">Create Event</button>
+                                                    </div>
+                                                </form>
+                                            </div>
                                         </div>
                                     </div>
                             
@@ -247,7 +376,7 @@
                                             </div>
                                         </div>
                                     </div>
-                                   
+                                    @if (($user->role == 'Co-Admin' && $user->manage_event == 1) || $user->role == 'Admin')
                                     <span class="m-0 text-1 fw-normal">{{ __('Events Awaiting Approval') }}</span>
                                     <div class="d-flex justify-content-center align-items-center p-5" id="pending-event-loader">
                                         <div class="spinner-border text-primary" role="status">
@@ -274,7 +403,7 @@
                                                                     <div class="row pending-title">{{ $event->title }}</div>
                                                                     <div class="row pending-type">{{ $event->event_type }}</div>
                                                                 </div>
-                                                                <a href="" class="btn btn-primary py-0">Manage</a>
+                                                                <a href="{{ route('admin.approval') }}" class="btn btn-primary py-0">Manage</a>
                                                             </div>
                                                         </div>
                                                     </td>
@@ -283,6 +412,7 @@
                                             </tbody>
                                         </table>
                                     </div>
+                                    @endif
                                 </div>
 
                             </div>
@@ -450,7 +580,7 @@
             $('.tab-pane').removeClass('show active');
             $(`#${activeContentId}`).addClass('show active');
         });
-
+        
         menubtn.click(function() {
             sidebar.toggleClass("active-sidebar");
             setCookie("sidebarActive", sidebar.hasClass("active-sidebar"), 4);
@@ -587,44 +717,197 @@
         });
 
         // calendar app 
-        var calendarEl = document.getElementById('calendar');
+        var bookings = @json($calendar);
+        
+        var calendarEl = $('#calendar')[0];
         var calendar = new FullCalendar.Calendar(calendarEl, {
             headerToolbar: {
                 left: 'prev,next today',
                 center: 'title',
                 right: 'dayGridMonth,timeGridWeek,timeGridDay,listMonth',
             },
-            selectable: true,
-            
-            events: [
-                    {
-                    title  : 'Sample Event Festive',
-                    start  : '2023-09-25'
-                    },
-                    {
-                    title  : 'Sample Event Seminar',
-                    start  : '2023-09-13',
-                    end    : '2023-09-16'
-                    },
-                    {
-                    title  : 'Sample Event Conference',
-                    start  : '2023-09-17',
-                    end    : '2023-09-19'
-                    },
-                    {
-                    title  : 'Sample Event Conference 2',
-                    start  : '2023-09-14',
-                    end    : '2023-09-16'
-                    },
-                    {
-                    title  : 'Sample Event Workshop',
-                    start  : '2023-10-05',
-                    end    : '2023-10-08'
-                    }
-                ],
-            eventColor: '#2A93E8'
 
+            events: bookings,
+            eventColor: '#2A93E8',
+            displayEventTime: false,
+            
+            selectable: true,
+            selectMirror: true,
+            select: function(start, end, allDays) {
+                $('#calendarModal').modal('toggle');
+                $('#create-event-form')[0].reset();
+                $('#event-start').val(start.startStr);
+                $('#event-end').val(start.endStr);
+                $('#venue').addClass('d-none');
+            },  
+
+            eventClick: function(info) {
+                alert('ID: ' + info.event.id + 'Event: ' + info.event.title + 'Start: ' + info.event.start + 'End: ' + info.event.end + 'Desc: ' + info.event.extendedProps.desc + 'Type: ' + info.event.extendedProps.type + 'Audience: ' + info.event.extendedProps.audience + 'Venue: ' + info.event.extendedProps.venue);
+            },
+            eventContent: function(arg) {
+                var eventType = arg.event.extendedProps && arg.event.extendedProps.type;
+                var backgroundColor;
+
+                switch (eventType) {
+                    case 'Conference':
+                        backgroundColor = '#FFD700'; // Yellow for Conference
+                        break;
+                    case 'Exhibition':
+                        backgroundColor = '#2A93E8'; // Blue for Exhibition
+                        break;
+                    case 'Festive':
+                        backgroundColor = '#FF1493'; // Pink for Festive
+                        break;
+                    case 'Seminar':
+                        backgroundColor = '#32CD32'; // Green for Seminar
+                        break;
+                    case 'Training':
+                        backgroundColor = '#FF4500'; // Orange for Training
+                        break;
+                    case 'Webinar':
+                        backgroundColor = '#8A2BE2'; // Purple for Webinar
+                        break;
+                    case 'Workshop':
+                        backgroundColor = '#00BFFF'; // Light Blue for Workshop
+                        break;
+
+                    default:
+                        backgroundColor = '#2A93E8'; // Default color
+                }
+
+                var div = document.createElement('div');
+                div.style.backgroundColor = backgroundColor;;
+                div.textContent = arg.event.title;
+
+                return { domNodes: [div] };
+            },
         });
+
+        $('#create-event-btn').click(function() {
+            $('#calendarModal').modal('show');
+            $('#create-event-form')[0].reset();
+        });
+
+        $('#campus').change(function() {
+            var campusId = $(this).val();
+            var venueDropdown = $('#venue');
+            var venueError = $('#venue-error');
+            
+            venueDropdown.val('');
+            $.get("{{ url('/getVenues') }}/" + campusId, function(data) {
+                if(data.length > 0) {
+                    venueError.addClass('d-none');
+                    venueDropdown.empty();
+                    $.each(data, function(index, venue) {
+                        var option = $('<option></option>');
+                        option.attr('value', venue.id).text(venue.venue_name);
+                        venueDropdown.append(option);
+                    });
+                    venueDropdown.removeClass('d-none');
+                } else {
+                    venueDropdown.addClass('d-none');
+                    venueError.removeClass('d-none').text('The campus does not have any available venues.');
+                }
+            });
+        });
+
+        // create event
+        $('#create-event-form').submit(function(event) {
+            event.preventDefault();
+            
+            var eventTitle = $('#event-title').val();
+            var eventStart = $('#event-start').val();
+            var eventEnd = $('#event-end').val();
+            var eventType = $('#event-type').val();
+            var targetAudience = $('#target-audience').val();
+            var campus = $('#campus').val();
+            var venue = $('#venue').val();
+
+            $('.form-error').text('').addClass('d-none');
+
+            if (!eventTitle) {
+                $('#event-title').addClass('is-invalid');
+                $('#event-title-error').text('Event title is a required field.').removeClass('d-none');
+                return;
+            }
+            $('#event-title').removeClass('is-invalid');
+
+            if (!eventStart) {
+                $('#event-start').addClass('is-invalid');
+                $('#event-start-error').text('Event start date is a required field.').removeClass('d-none');
+                return;
+            }
+            $('#event-start').removeClass('is-invalid');
+
+            if (!eventEnd) {
+                $('#event-end').addClass('is-invalid');
+                $('#event-end-error').text('Event end date is a required field.').removeClass('d-none');
+                return;
+            }
+            $('#event-end').removeClass('is-invalid');
+
+            if (!eventType) {
+                $('#event-type').addClass('is-invalid');
+                $('#event-type-error').text('Event type is a required field.').removeClass('d-none');
+                return;
+            }
+            $('#event-type').removeClass('is-invalid');
+
+            if (!targetAudience) {
+                $('#target-audience').addClass('is-invalid');
+                $('#target-audience-error').text('Target audience is a required field.').removeClass('d-none');
+                return;
+            }
+            $('#target-audience').removeClass('is-invalid');
+
+            if (!venue) {
+                $('#venue-error').text('Venue is a required field.').removeClass('d-none');
+                return;
+            }
+            
+            Swal.fire({
+                title: 'Create Event',
+                text: 'Are you sure that all the data provided are correct?',
+                icon: 'warning',
+                showCancelButton: true,
+                confirmButtonColor: '#3085d6',
+                cancelButtonColor: '#d33',
+                confirmButtonText: 'Confirm'
+            }).then((result) => {
+                if (result.isConfirmed) {
+                    $.ajax({
+                        type: 'POST',
+                        url: "{{ route('admin.store_event') }}",
+                        data: $('#create-event-form').serialize(),
+                        success: function(response) {
+                            if (response.success) {
+                                $('#calendarModal').modal('hide');
+                                $('#create-event-form')[0].reset();
+                                const newTab = window.open("{{ route('plan', ['eventId' => ':eventId']) }}".replace(':eventId', response.eventId), '_blank');
+        
+                                window.location.reload();
+                                
+                                if (newTab) {
+                                    newTab.focus();
+                                }
+                            } else if (response.error){
+                                Swal.fire({
+                                    icon: 'error',
+                                    title: 'Error',
+                                    text: response.error,
+                                    confirmButtonColor: '#3085d6',
+                                    confirmButtonText: 'OK'
+                                });
+                            }
+                        },
+                        error: function(xhr, status, error) {
+                            console.error(xhr.responseText);
+                        }
+                    });
+                }
+            });
+        });
+        
         calendar.render();
 
         // pending events table

@@ -89,6 +89,34 @@
     <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
     @yield('script')
     <script>
+        $(function() {
+            $(".mark-as-read").click(function(e) {
+                e.preventDefault();
+                
+                $.ajax({
+                    type: "POST",
+                    url: "{{ url('/mark-read') }}",
+                    data: {
+                            _token: "{{ csrf_token() }}",
+                            id: $(this).data('id')
+                        },
+                    dataType: 'json',
+                });
+            window.location.href = $(this).attr('href');
+            })
+        });
+    </script>
+    <script>
+        document.querySelectorAll('a[href^="#"]').forEach(anchor => {
+            anchor.addEventListener('click', function (e) {
+                e.preventDefault();
+
+                document.querySelector(this.getAttribute('href')).scrollIntoView({
+                    behavior: 'smooth'
+                });
+            });
+        });
+
         function updateRealTime() {
             const now = new Date();
             const options = { weekday: 'long', year: 'numeric', month: 'short', day: 'numeric', hour: '2-digit', minute: '2-digit'};

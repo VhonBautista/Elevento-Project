@@ -5,23 +5,19 @@ namespace App\Models;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 
-class Venue extends Model
+class EventPeople extends Model
 {
     use HasFactory;
 
-    protected $table = 'venues';
-
     protected $fillable = [
-        'venue_name',
-        'handler_name',
-        'capacity',
-        'image',
-        'campus',
-        'status',
+        'event_id',
+        'name',
+        'title',
+        'role',
     ];
 
     public function event()
     {
-        return $this->hasOne(Event::class);
+        return $this->belongsTo(Event::class);
     }
 }

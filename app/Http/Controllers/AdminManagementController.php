@@ -2,21 +2,28 @@
 
 namespace App\Http\Controllers;
 
-use Illuminate\Support\Facades\Hash; 
+use Illuminate\Support\Facades\Hash;
+use Illuminate\Support\Facades\Auth;
 use Illuminate\Http\Request;
 use App\Models\UpgradeRequest;
 use App\Models\CampusEntity;
 use App\Models\Department;
+use App\Models\Event;
+use App\Models\Project;
+use App\Models\Segment;
 use App\Models\User;
+use Carbon\Carbon;
 
 class AdminManagementController extends Controller
 {
     public function index()
     {
         $campus = session('campus');
-        $users = User::whereHas('campusEntity', function($query) use ($campus) {
-            $query->where('campus', $campus);
-        })->with(['campusEntity', 'organization'])->get();
+
+        // $users = User::whereHas('campusEntity', function($query) use ($campus) {
+        //     $query->where('campus', $campus);
+        // })->with(['campusEntity', 'organization'])->get();
+
         $departments = Department::select(
             'department_code',
             'department',
@@ -26,7 +33,123 @@ class AdminManagementController extends Controller
         ->orderBy('department')
         ->get();
 
-        return view('user_admin.management', ['usersData' => $users, 'departmentsData' => $departments]);
+        // return view('user_admin.management', ['usersData' => $users, 'departmentsData' => $departments]);
+        return view('user_admin.management', ['departmentsData' => $departments]);
+    }
+
+    public function store(Request $request)
+    {
+        $validatedData = $request->validate([
+            'event_title' => 'required|string|max:255',
+            'event_start' => 'required|date',
+            'event_end' => 'required|date|after_or_equal:event_start',
+            'entity_type' => 'required|string',
+            'target_audience' => 'required|string',
+            'venue' => 'required|string',
+        ]);
+
+        $title = $validatedData['event_title'];
+        $start = $validatedData['event_start'];
+        $end = $validatedData['event_end'];
+        $type = $validatedData['entity_type'];
+        $audience = $validatedData['target_audience'];
+        $venue = $validatedData['venue'];
+        $userId = Auth::id();
+        $campus = session('campus');
+
+        if ($start < now()) {
+            return response()->json([
+                'error' => 'Start date cannot be earlier than today.',
+                'code' => 500
+            ]);
+        }        
+
+        if ($start > $end) {
+            return response()->json([
+                'error' => 'End date cannot be before the start date.',
+                'code' => 500
+            ]);
+        }        
+
+        $count = Event::where('venue_id', $venue)
+        ->where(function ($query) use ($start, $end) {
+            $query->whereBetween('start_date', [$start, $end])
+                ->orWhereBetween('end_date', [$start, $end])
+                ->orWhere(function ($query) use ($start, $end) {
+                    $query->where('start_date', '<=', $start)
+                        ->where('end_date', '>=', $end);
+                });
+        })
+        ->where(function ($query) {
+            $query->where('status', 'planning')
+                ->orWhere('status', 'active');
+        })
+        ->count();
+
+
+        if ($count > 0) {
+            return response()->json([
+                'error' => 'The venue has already been reserved for the chosen date, either by events currently in the planning stage or by events that are currently active.',
+                'code' => 500
+            ]);
+        }
+
+        $event = Event::create([
+            'status' => 'Planning',
+            'title' => $title,
+            'start_date' => $start,
+            'end_date' => $end,
+            'creator_id' => $userId,
+            'campus' => $campus,
+            'venue_id' => $venue,
+            'event_type' => $type,
+            'target_audience' => $audience,
+        ]);
+
+        if ($event->status === 'Planning') {
+            $startDate = Carbon::parse($event->start_date);
+            $endDate = Carbon::parse($event->end_date)->subDay();
+
+            while ($startDate <= $endDate) {
+                Segment::create([
+                    'event_id' => $event->id,
+                    'date' => $startDate,
+                ]);
+
+                $startDate->addDay();
+            }
+        }
+
+        $project = Project::create([
+            'user_id' => $userId,
+            'event_id' => $event->id,
+            'role' => 'creator',
+        ]);
+
+        if ($event && $project) {
+            return response()->json([
+                'success' => 'Event created successfuly',
+                'eventId' => $event->id,
+                'code' => 500
+            ]);
+        } else {
+            return response()->json([
+                'error' => 'Internal server error.',
+                'code' => 500
+            ]);
+        }
+
+        // for organizers
+        // $create = Event::create([
+        //     'title' => $title,
+        //     'start_date' => $start,
+        //     'end_date' => $end,
+        //     'creator_id' => $userId,
+        //     'campus' => $campus,
+        //     'venue_id' => $venue,
+        //     'event_type' => $type,
+        //     'target_audience' => $audience,
+        // ]);
     }
     
     public function getAdmins()
@@ -98,6 +221,17 @@ class AdminManagementController extends Controller
                 'code' => 500
             ]);
         }
+    }
+
+    public function markRead(Request $request)
+    {
+        auth()->user()
+            ->unreadNotifications
+            ->when($request->input('id'), function ($query) use ($request) {
+                return $query->where('id', $request->input('id'));
+            })->markAsRead();
+    
+        return response()->noContent();
     }
 
     public function getRequests()

@@ -5,23 +5,23 @@ namespace App\Models;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 
-class Venue extends Model
+class Project extends Model
 {
     use HasFactory;
 
-    protected $table = 'venues';
-
     protected $fillable = [
-        'venue_name',
-        'handler_name',
-        'capacity',
-        'image',
-        'campus',
-        'status',
+        'user_id',
+        'event_id',
+        'role',
     ];
+
+    public function user()
+    {
+        return $this->belongsTo(User::class);
+    }
 
     public function event()
     {
-        return $this->hasOne(Event::class);
+        return $this->belongsTo(Event::class);
     }
 }

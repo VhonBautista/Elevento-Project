@@ -1,6 +1,7 @@
 @extends('layouts.app')
 
 @php
+use Carbon\Carbon;
 $user = Auth::user();
 @endphp
 
@@ -22,17 +23,19 @@ $user = Auth::user();
                 </a>
             </li>
             <li>
-                <a href="">
+                <a href="{{ route('projects') }}">
                     <i class="fa-solid fa-folder-open"></i>
                     <span class="side-link-name">Projects</span>
                 </a>
             </li>
+            @if (($user->role == 'Co-Admin' && $user->manage_event == 1) || $user->role == 'Admin')
             <li>
-                <a href="">
+                <a href="{{ route('admin.approval') }}">
                     <i class="fa-solid fa-calendar-days"></i>
                     <span class="side-link-name">Event Approvals</span>
                 </a>
             </li>
+            @endif
             <!-- <li>
                 <a href="">
                     <i class="fa-solid fa-note-sticky"></i>
@@ -95,19 +98,55 @@ $user = Auth::user();
                 </div>
             </li>
             <div class="d-flex">
-                <li class="nav-item mx-3">
-                    <a href="#" class="btn btn-primary rounded-pill">
-                        <i class="fa-solid fa-globe mx-1"></i>
+                <li class="nav-item me-2">
+                    <a href="#" class="btn btn-primary px-4 rounded-pill mx-1">
+                        <i class="fa-solid fa-globe me-2"></i>
                         Explore Events
                     </a>
                 </li>
                 <li class="nav-item ">
-                    <button type="button" class="btn btn-primary rounded-pill position-relative">
-                        <i class="fa-regular fa-bell"></i>
-                        <span class="position-absolute notification start-100 translate-middle badge rounded-pill bg-danger">
-                            0
-                        </span>
-                    </button>
+                    <div class="dropdown">
+                        <button class="btn btn-primary rounded-pill position-relative dropdown-toggle" type="button" data-bs-toggle="dropdown" aria-expanded="false">
+                            <i class="fa-regular fa-bell"></i>
+                            @if ($user->unreadNotifications->isNotEmpty())
+                            <span class="position-absolute notification start-100 translate-middle badge rounded-pill bg-danger" style="height: 14px; width: 14px;">
+                            </span>
+                            @endif
+                        </button>
+                        <div class="dropdown-menu" style="max-height: 410px; overflow-y: auto;">
+                            <h6 class="fw-bold py-1 text-center" style="font-size: 16px">Notifications</h6>
+                            <hr class="m-0">
+                            @forelse($user->unreadNotifications as $notification)
+                                {{-- Notification Item --}}
+                                <a class="dropdown-item mark-as-read" href="{{ url($notification->data['url']) }}" data-id="{{ $notification->id }}">
+                                    <div class="d-flex align-items-center p-2" style="width: 365px">
+                                        <div class="me-4">
+                                            <!-- icon -->
+                                            icon
+                                        </div>
+                                        <div class="w-100">
+                                            <div class="d-flex justify-content-between align-items-center">
+                                                <p class="fw-bold m-0" style="font-size: 16px">{{ $notification->data['title'] }}</p>
+                                                <p class="fw-bold small m-0">{{ Carbon::parse($notification->created_at)->format('h:i A') }}</p>
+                                            </div>
+                                            <div class="row">
+                                                <div class="col">
+                                                    <p class="text-secondary small m-0">{{ $notification->data['message'] }}</p>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </a>
+                                {{-- Notification Item End --}}
+                            @empty
+                                <div class="d-flex justify-content-center align-items-center" style="width: 365px">
+                                    <div class="p-4">
+                                        {{ __('There are no new notifications') }}
+                                    </div>
+                                </div>
+                            @endforelse
+                        </div>
+                    </div>
                 </li>
                 <li class="nav-item dropdown">
                     <a class="nav-link p-0 px-3 rounded-pill dropdown-toggle d-flex align-items-center" href="#" id="navbarDropdown" role="button" data-bs-toggle="dropdown" aria-expanded="false">
@@ -149,8 +188,30 @@ $user = Auth::user();
 
             <div class="tab-content" id="myTabContent">
                 <div class="tab-pane fade p-2 show active" id="manage-user-content" role="tabpanel" aria-labelledby="manage-user-content">
+                    <ul class="nav mt-2" style="height: 20px !important;">
+                        @if ( $user->role == "Admin" )
+                        <li class="nav-item">
+                            <a class="nav-link p-0" href="#coAd">Manage Co Administrator</a>
+                        </li>
+                        <li class="nav-item">
+                            <p class="nav-link text-dark px-2 py-0">|</p>
+                        </li>
+                        @endif
+                        @if (($user->role == 'Co-Admin' && $user->manage_user == 1) || $user->role == 'Admin')
+                        <li class="nav-item">
+                            <a class="nav-link p-0" href="#organ">Manage Organizer</a>
+                        </li>
+                        <li class="nav-item">
+                            <p class="nav-link text-dark px-2 py-0">|</p>
+                        </li>
+                        @endif
+                        <li class="nav-item">
+                            <a class="nav-link p-0" href="#user">Manage User</a>
+                        </li>
+                    </ul>
+
                     @if ( $user->role == "Admin" )
-                    <span class="text fw-normal ms-0 liner">Manage Co Administrator</span>
+                    <span class="text fw-normal ms-0 liner" id="coAd">Manage Co Administrator</span>
                     <div class="row g-3 mb-4 mt-2 px-3">
                         <div class="col-md-9 mt-0 mb-3">
                             <div class="card">
@@ -194,7 +255,7 @@ $user = Auth::user();
                                 <div class="modal-content">
                                     <div class="modal-header bg-primary" style="padding: 6px 18px;">
                                         <i class="fa-solid me-2 fa-user text-light"></i>
-                                        <h4 class="text-light m-0 modal-title">Add New Co-Admin</h4>
+                                        <h5 class="text-light m-0 modal-title">Add New Co-Admin</h5>
                                         <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
                                     </div>
                                     <div class="modal-body">
@@ -226,7 +287,7 @@ $user = Auth::user();
                                 <div class="modal-content">
                                     <div class="modal-header bg-primary" style="padding: 6px 18px;">
                                         <i class="fa-solid me-2 fa-list-check text-light"></i>
-                                        <h4 class="text-light m-0 modal-title">Manage Permissions</h4>
+                                        <h5 class="text-light m-0 modal-title">Manage Permissions</h5>
                                         <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
                                     </div>
                                     <div class="modal-body">
@@ -283,7 +344,7 @@ $user = Auth::user();
                     @endif
 
                     @if (($user->role == 'Co-Admin' && $user->manage_user == 1) || $user->role == 'Admin')
-                    <span class="text fw-normal ms-0 liner">Manage Organizer</span>
+                    <span class="text fw-normal ms-0 liner" id="organ">Manage Organizer</span>
                     <div class="row g-3 mb-4 mt-2 px-3">
                         <div class="col-md-12 card mt-0">
                             <div class="d-flex justify-content-center align-items-center p-5" id="request-loader">
@@ -313,7 +374,7 @@ $user = Auth::user();
                             <div class="modal-content">
                                 <div class="modal-header bg-primary" style="padding: 6px 18px;">
                                     <i class="fa-solid me-2 fa-circle-info text-light"></i>  
-                                    <h4 class="text-light m-0 modal-title">Provide a Justification</h4>
+                                    <h5 class="text-light m-0 modal-title">Provide a Justification</h5>
                                     <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
                                 </div>
                                 <form class="row g-3 px-2" id="justify-form">
@@ -336,7 +397,7 @@ $user = Auth::user();
                     </div>
                     @endif
 
-                    <span class="text fw-normal ms-0 liner">Manage Users</span>
+                    <span class="text fw-normal ms-0 liner" id="user">Manage Users</span>
                     <div class="row g-3 mb-4 mt-2 px-3">
                         <div class="col-md-12 card mt-0">
                             <div class="d-flex justify-content-center align-items-center p-5" id="user-loader">
@@ -403,7 +464,7 @@ $user = Auth::user();
                                 <div class="modal-content">
                                     <div class="modal-header bg-primary" style="padding: 6px 18px;">
                                         <i class="fa-solid fa-pen-to-square me-2 text-light"></i>
-                                        <h4 class="text-light m-0 modal-title">Manage Venue Details</h4>
+                                        <h5 class="text-light m-0 modal-title">Manage Venue Details</h5>
                                         <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
                                     </div>
                                     <div class="modal-body">
@@ -492,8 +553,26 @@ $user = Auth::user();
 
                 @if (($user->role == 'Co-Admin' && $user->manage_campus == 1) || $user->role == 'Admin')
                 <div class="tab-pane fade p-2" id="manage-campus-content" role="tabpanel" aria-labelledby="manage-campus-content">
-                    <span class="text fw-normal ms-0 liner">Manage Entity Record</span>
-                    <div class="row g-3 mb-4 mt-2 px-3">
+                    <ul class="nav mt-2" style="height: 20px !important;">
+                        <li class="nav-item">
+                            <a class="nav-link p-0" href="#entity">Manage Entity Record</a>
+                        </li>
+                        <li class="nav-item">
+                            <p class="nav-link text-dark px-2 py-0">|</p>
+                        </li>
+                        <li class="nav-item">
+                            <a class="nav-link p-0" href="#dept">Manage Department</a>
+                        </li>
+                        <li class="nav-item">
+                            <p class="nav-link text-dark px-2 py-0">|</p>
+                        </li>
+                        <li class="nav-item">
+                            <a class="nav-link p-0" href="#org">Manage Organization</a>
+                        </li>
+                    </ul>
+
+                    <span class="text fw-normal ms-0 liner" id="entity">Manage Entity Record</span>
+                    <div class="row g-3 mb-4 mt-0 px-3">
                         <div class="col-md-9 mt-0 mb-3">
                             <div class="card">
                                 <div class="d-flex justify-content-center align-items-center p-5" id="entity-loader">
@@ -539,7 +618,7 @@ $user = Auth::user();
                                 <div class="modal-content">
                                     <div class="modal-header bg-primary" style="padding: 6px 18px;">
                                         <i class="fa-solid me-2 fa-user text-light"></i>
-                                        <h4 class="text-light m-0 modal-title">Add New Record</h4>
+                                        <h5 class="text-light m-0 modal-title">Add New Record</h5>
                                         <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
                                     </div>
                                     <div class="modal-body">
@@ -613,7 +692,7 @@ $user = Auth::user();
                                 <div class="modal-content">
                                     <div class="modal-header bg-primary" style="padding: 6px 18px;">
                                         <i class="fa-solid me-2 fa-user text-light"></i>
-                                        <h4 class="text-light m-0 modal-title">Update Record</h4>
+                                        <h5 class="text-light m-0 modal-title">Update Record</h5>
                                         <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
                                     </div>
                                     <div class="modal-body">
@@ -683,7 +762,7 @@ $user = Auth::user();
 
                     <div class="row g-3 mb-4 mt-0 px-3">
                         <div class="col-md-12 mt-0 mb-5">
-                            <span class="text fw-normal ms-0 liner">Manage Department</span>
+                            <span class="text fw-normal ms-0 liner" id="dept">Manage Department</span>
                             <div class="card mt-2" style="overflow-x: scroll !important;">
                                 <div class="d-flex justify-content-center align-items-center p-5" id="department-loader">
                                     <div class="spinner-border text-primary" role="status">
@@ -710,7 +789,7 @@ $user = Auth::user();
                         </div>
 
                         <div class="col-md-12 mt-0 mb-3">
-                            <span class="text fw-normal ms-0 liner">Manage Organization</span>
+                            <span class="text fw-normal ms-0 liner" id="org">Manage Organization</span>
                             <div class="card" style="overflow-x: scroll !important;">
                                 <div class="d-flex justify-content-center align-items-center p-5" id="organization-loader">
                                     <div class="spinner-border text-primary" role="status">
@@ -742,7 +821,7 @@ $user = Auth::user();
                                 <div class="modal-content">
                                     <div class="modal-header bg-primary" style="padding: 6px 18px;">
                                         <i class="fa-solid me-2 fa-user text-light"></i>
-                                        <h4 class="text-light m-0 modal-title">Add New Department</h4>
+                                        <h5 class="text-light m-0 modal-title">Add New Department</h5>
                                         <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
                                     </div>
                                     <div class="modal-body">
@@ -776,7 +855,7 @@ $user = Auth::user();
                                 <div class="modal-content">
                                     <div class="modal-header bg-primary" style="padding: 6px 18px;">
                                         <i class="fa-solid me-2 fa-user text-light"></i>
-                                        <h4 class="text-light m-0 modal-title">Add New Record</h4>
+                                        <h5 class="text-light m-0 modal-title">Add New Record</h5>
                                         <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
                                     </div>
                                     <div class="modal-body">
@@ -817,7 +896,7 @@ $user = Auth::user();
                                 <div class="modal-content">
                                     <div class="modal-header bg-primary" style="padding: 6px 18px;">
                                         <i class="fa-solid me-2 fa-user text-light"></i>
-                                        <h4 class="text-light m-0 modal-title">Update Department</h4>
+                                        <h5 class="text-light m-0 modal-title">Update Department</h5>
                                         <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
                                     </div>
                                     <div class="modal-body">
@@ -850,7 +929,7 @@ $user = Auth::user();
                                 <div class="modal-content">
                                     <div class="modal-header bg-primary" style="padding: 6px 18px;">
                                         <i class="fa-solid me-2 fa-user text-light"></i>
-                                        <h4 class="text-light m-0 modal-title">Update Organization</h4>
+                                        <h5 class="text-light m-0 modal-title">Update Organization</h5>
                                         <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
                                     </div>
                                     <div class="modal-body">
@@ -1029,7 +1108,7 @@ $user = Auth::user();
                                     </div>
                                     <div class="col-md-6">
                                         <div class="form-check">
-                                            <input class="form-check-input" type="checkbox" ${data.manage_entity ? 'checked' : ''} style="pointer-events: none;">
+                                            <input class="form-check-input" type="checkbox" ${data.manage_campus ? 'checked' : ''} style="pointer-events: none;">
                                             <label class="form-check-label">Manage Entity</label>
                                         </div>
                                         <div class="form-check">
@@ -1371,7 +1450,7 @@ $user = Auth::user();
                                         <div class="modal-content">
                                             <div class="modal-header bg-primary" style="padding: 6px 18px;">
                                                 <i class="fa-solid me-2 fa-circle-info text-light"></i>  
-                                                <h4 class="text-light m-0 modal-title">Request Details</h4>
+                                                <h5 class="text-light m-0 modal-title">Request Details</h5>
                                                 <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
                                             </div>
                                             <div class="modal-body">
@@ -1673,14 +1752,14 @@ $user = Auth::user();
         // upload photo
         $("#upload-button-venue").change(function() {
             let reader = new FileReader();
-            // console.log(reader);
-            // console.log(reader.result);
-            // todo: if reader.result is empty do not run code below
-            reader.readAsDataURL(this.files[0]);
-            reader.onload = function() {
-                $("#chosen-image-venue").attr("src", reader.result);
-                $(".image-container").show();
-            };
+
+            if (this.files[0] instanceof Blob) {
+                reader.readAsDataURL(this.files[0]);
+                reader.onload = function() {
+                    $("#chosen-image-venue").attr("src", reader.result);
+                    $(".image-container").show();
+                };
+            }
         });
 
         $("#upload-button-update").change(function() {
