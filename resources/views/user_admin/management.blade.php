@@ -17,7 +17,7 @@ $user = Auth::user();
         </div>
         <ul class="nav-list">
             <li>
-                <a href="{{ route('admin.dashboard') }}">
+                <a href="{{ route('dashboard') }}">
                     <i class="fa-solid fa-gauge"></i>
                     <span class="side-link-name">Home</span>
                 </a>
@@ -59,7 +59,7 @@ $user = Auth::user();
         <div class="profile-content">
             <div class="profile">
                 <div class="profile-details">
-                    <img src="{{ asset($user->profile_picture) }}" alt="">
+                    <img src="@if (Auth::user()->profile_picture == null) {{ asset('asset/blank_profile.jpg') }} @else {{ asset(Auth::user()->profile_picture) }} @endif" alt="">
                     <div class="name-role">
                         <div class="user-name">{{ ucfirst($user->username) }}</div>
                         <div class="user-campus">{{ session('campus') }}</div>
@@ -99,7 +99,7 @@ $user = Auth::user();
             </li>
             <div class="d-flex">
                 <li class="nav-item me-2">
-                    <a href="#" class="btn btn-primary px-4 rounded-pill mx-1">
+                    <a href="{{ route('home') }}" class="btn btn-primary px-4 rounded-pill mx-1">
                         <i class="fa-solid fa-globe me-2"></i>
                         Explore Events
                     </a>
@@ -120,18 +120,18 @@ $user = Auth::user();
                                 {{-- Notification Item --}}
                                 <a class="dropdown-item mark-as-read" href="{{ url($notification->data['url']) }}" data-id="{{ $notification->id }}">
                                     <div class="d-flex align-items-center p-2" style="width: 365px">
-                                        <div class="me-4">
+                                        {{-- <div class="me-4">
                                             <!-- icon -->
                                             icon
-                                        </div>
+                                        </div> --}}
                                         <div class="w-100">
                                             <div class="d-flex justify-content-between align-items-center">
-                                                <p class="fw-bold m-0" style="font-size: 16px">{{ $notification->data['title'] }}</p>
+                                                <p class="fw-bold m-0" style="font-size: 16px">{{ Illuminate\Support\Str::limit($notification->data['title'], 30) }}</p>
                                                 <p class="fw-bold small m-0">{{ Carbon::parse($notification->created_at)->format('h:i A') }}</p>
                                             </div>
                                             <div class="row">
                                                 <div class="col">
-                                                    <p class="text-secondary small m-0">{{ $notification->data['message'] }}</p>
+                                                    <p class="text-secondary small m-0">{{ Illuminate\Support\Str::limit($notification->data['message'],55) }}</p>
                                                 </div>
                                             </div>
                                         </div>
@@ -494,7 +494,7 @@ $user = Auth::user();
 
                                             <input type="file" id="upload-button-update" id="update-venue-photo-form" name="update_photo_venue" accept="image/*">
                                             <label for="upload-button-update" class="upload-label mt-2">
-                                                <i class="fas fa-upload"></i> &nbsp; Upload Photo
+                                                <i class="fas fa-upload"></i> &nbsp; Select Photo
                                             </label>
                                         </form>
                                     </div>
@@ -537,7 +537,7 @@ $user = Auth::user();
 
                                         <input type="file" id="upload-button-venue" id="venue-photo-form" name="photo_venue" accept="image/*">
                                         <label for="upload-button-venue" class="upload-label mt-2">
-                                            <i class="fas fa-upload"></i> &nbsp; Upload Photo
+                                            <i class="fas fa-upload"></i> &nbsp; Select Photo
                                         </label>
                                         <hr class="mt-3">
                                         <div class="col-12 mt-0 p-0">

@@ -46,13 +46,13 @@ $user = Auth::user();
                 <li class="nav-item d-flex justify-content-start">
                     <ul class="navbar-nav mb-2 mb-lg-0">
                         <li class="nav-item">
-                            <a class="nav-link text-light" aria-current="page" href="{{ route('admin.plan', ['eventId' => $eventId]) }}">Plan</a>
+                            <a class="nav-link text-light" aria-current="page" href="{{ route('plan', ['eventId' => $eventId]) }}">Plan</a>
                         </li>
                         <li class="nav-item">
-                            <a class="nav-link text-light active fw-bold" href="{{ route('admin.analytics', ['eventId' => $eventId]) }}">Analytics</a>
+                            <a class="nav-link text-light active fw-bold" href="{{ route('analytics', ['eventId' => $eventId]) }}">Analytics</a>
                         </li>
                         <li class="nav-item">
-                            <a class="nav-link text-light" href="{{ route('admin.attendance', ['eventId' => $eventId]) }}">Attendance</a>
+                            <a class="nav-link text-light" href="{{ route('attendance', ['eventId' => $eventId]) }}">Attendance</a>
                         </li>
                     </ul>
                 </li>
@@ -75,48 +75,58 @@ $user = Auth::user();
             <div class="row mt-3">
                 <div class="col-md-4">
                     <div class="card">
+                        <div class="card-header bg-success p-1">
+                        </div>
                         <div class="card-body pb-0">
                             <div class="d-flex justify-content-between text-secondary w-100 small align-items-center">
                                 <strong>
-                                    Total Attendees
+                                    Total Participants
                                 </strong>
-                                <i class="fa-solid fa-user-group"></i>
+                                <i class="fa-solid fa-people-group text-success"></i>
                             </div>
-                            <h2 class="fw-bold mb-2 p-0">0</h2>
+                            <h4 class="fw-bold mb-2 p-0" id="male-count">{{ $totalAttendees }}</h4>
                         </div>
                     </div>
                 </div>
                 <div class="col-md-4">
                     <div class="card">
+                        <div class="card-header bg-dark p-1">
+                        </div>
                         <div class="card-body pb-0">
                             <div class="d-flex justify-content-between text-secondary w-100 small align-items-center">
                                 <strong>
                                     Total Registration
                                 </strong>
-                                <i class="fa-solid fa-newspaper"></i>
+                                <i class="fa-solid fa-circle-user text-dark"></i>
                             </div>
-                            <h2 class="fw-bold mb-2 p-0">0</h2>
+                            <h4 class="fw-bold mb-2 p-0" id="male-count">{{ $totalRegistration }}</h4>
                         </div>
                     </div>
                 </div>
                 <div class="col-md-4">
                     <div class="card">
+                        <div class="card-header bg-danger p-1">
+                        </div>
                         <div class="card-body pb-0">
                             <div class="d-flex justify-content-between text-secondary w-100 small align-items-center">
                                 <strong>
-                                    Total Hearts
+                                    Favorites
                                 </strong>
-                                <i class="fa-solid fa-heart"></i>
+                                <i class="fa-solid fa-heart text-danger"></i>
                             </div>
-                            <h2 class="fw-bold mb-2 p-0">0</h2>
+                            <h4 class="fw-bold mb-2 p-0" id="male-count">{{ $totalHearts }}</h4>
                         </div>
                     </div>
                 </div>
                 <div class="col-md-12 mt-4">
                     <div class="card">
+                        <div class="card-header bg-primary p-1">
+                        </div>
                         <div class="card-body">
-                            <span class="text text-dark fw-bold" style="font-size: 16px;">Attendance Graph</span>
+                            <span class="text text-dark fw-bold" style="font-size: 16px;"><i class="fa-solid fa-arrow-trend-up me-1"></i> Attendance Trend</span>
                             
+                        </div>
+                        <div class="card-footer bg-primary p-1">
                         </div>
                     </div>
                 </div>

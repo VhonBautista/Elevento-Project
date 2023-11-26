@@ -57,8 +57,23 @@ class Event extends Model
         return $this->hasMany(EventPeople::class);
     }
 
+    public function images()
+    {
+        return $this->hasMany(EventImage::class);
+    }
+
     public function planningLogs()
     {
         return $this->hasMany(PlanningLog::class);
+    }
+    
+    public function registrations()
+    {
+        return $this->hasMany(Registration::class);
+    }
+    
+    public function favorites()
+    {
+        return $this->hasMany(Favorite::class);
     }
 }

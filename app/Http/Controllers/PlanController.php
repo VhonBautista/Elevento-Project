@@ -22,13 +22,16 @@ class PlanController extends Controller
     {
         $user = Auth::user();
 
-        $event = Event::with('venue')->with('peoples')->with('segments.flows')->findOrFail($eventId);
+        $event = Event::with('venue')->with('peoples')->with('images')->with('segments.flows')->findOrFail($eventId);
         $segments = $event->segments;
         $peoples = $event->peoples;
+        $images = $event->images;
 
         $project = Project::where('user_id', $user->id)
         ->where('event_id', $eventId)
         ->first();
+
+        $projectUsers = Project::with('user')->where('event_id', $eventId)->get();
         
         // LOGS
         $projectLogs = PlanningLog::where('event_id', $eventId)
@@ -39,7 +42,7 @@ class PlanController extends Controller
             abort(404, 'Event not found');
         }
         
-        return view('plan', ['event' => $event, 'segments' => $segments, 'peoples' => $peoples, 'project' => $project, 'projectLogs' => $projectLogs, 'user' => $user]);
+        return view('plan', ['event' => $event, 'images' => $images, 'segments' => $segments, 'peoples' => $peoples, 'project' => $project, 'projectUsers' => $projectUsers, 'projectLogs' => $projectLogs, 'user' => $user]);
     }
 
     public function deleteEvent(Request $request)
@@ -52,13 +55,37 @@ class PlanController extends Controller
             abort(404);
         }
 
+        // Notify all favoritedBy of the event:
+        $favoritedUsers = $event->registrations()->with('user')->get()->pluck('user')->unique();
+        foreach ($favoritedUsers as $user) {
+            $title = 'Event Deleted';
+            $type = 'Deleted';
+            $message = 'The event "' . $event->title . '" has been removed by the creator of the event.';
+            $url = '/';
+
+            Notification::send($user, new AllNotification($title, $type, $message, $url));
+        }
+
         // Detach associated projects
         $event->projects()->detach();
 
-        // Delete associated records
+        // Delete associated reschedule request
         $event->rescheduleRequest()->delete();
+
+        // Delete associated flows (ensure flows are deleted before segments)
+        $event->segments()->each(function ($segment) {
+            $segment->flows()->delete();
+        });
+
+        // Delete associated segments
         $event->segments()->delete();
+
+        // Delete other associated records
+        $event->peoples()->delete();
+        $event->favorites()->delete();
+        $event->images()->delete();
         $event->planningLogs()->delete();
+        $event->registrations()->delete();
 
         $event->delete();
 
@@ -114,7 +141,7 @@ class PlanController extends Controller
             $title = 'Event Status Updated ';
             $type = 'Updated';
             $message = $user->username . ' updated the event\'s status.';
-            $url = '/admin/plan/' . $event->id;
+            $url = '/events/plan/' . $event->id;
 
             Notification::send($creator, new AllNotification($title, $type, $message, $url));
         }
@@ -340,8 +367,6 @@ class PlanController extends Controller
     public function deleteFlow($eventId, $segmentId, $flowId)
     {
         $flow = Flow::findOrFail($flowId);
-        $event = Event::with('venue')->with('segments.flows')->findOrFail($eventId);
-        $segments = $event->segments;
         $segment = Segment::findOrFail($segmentId);
 
         // Planning Log
@@ -483,6 +508,138 @@ class PlanController extends Controller
             return redirect()->route('plan', ['eventId' => $eventId])->with('person-success', 'Event person has been deleted successfully.');
         } else {
             return redirect()->route('plan', ['eventId' => $eventId])->with('person-error', 'Something went wrong.');
+        }
+    }
+
+    public function searchUsers(Request $request)
+    {
+        $searchTerm = $request->input('searchTerm');
+        $projectId = $request->input('projectId');
+
+        $users = User::where('email', 'like', '%' . $searchTerm . '%')
+            ->whereNotIn('role', ['User'])
+            ->whereDoesntHave('projects', function ($query) use ($projectId) {
+                $query->where('id', $projectId);
+            })
+            ->get();
+
+        return response()->json(['users' => $users]);
+    }
+
+    public function addUser(Request $request)
+    {   
+        $userId = $request['userId'];
+        $eventId = $request['eventId'];
+
+        // create new people project
+        $newProject = Project::create([
+            'user_id' => $userId,
+            'event_id' => $eventId,
+            'role' => 'member',
+        ]);
+
+        // Notification
+        $creator = Auth::user();
+        $user = User::find($userId);
+        $event = Event::find($eventId);
+        $title = 'Invited to Project';
+        $type = 'Created';
+        $message = $creator->username . ' just added you as a member to the project ' . $event->title . '.';
+        $url = '/events/plan/' . $event->id;
+
+        Notification::send($user, new AllNotification($title, $type, $message, $url));
+
+
+        if($newProject) {
+            return response()->json([
+                'success' => 'New user has been added to this project successfully.',
+            ]);
+        } else {
+            return response()->json([
+                'error' => 'Something went wrong in the server. Contact admin ASAP.',
+            ]);
+        }
+    }
+
+    public function removeUser(Request $request)
+    {   
+        $projectId = $request['projectId'];
+        $eventId = $request['eventId'];
+
+        $creatorProject = Project::where('event_id', $eventId)
+            ->where('role', 'creator')
+            ->with('user')
+            ->first();
+
+        // // Notification
+        $project = Project::find($projectId);
+        $user = User::find($project->user_id);
+        $event = Event::find($eventId);
+        $title = 'Removed from Project';
+        $type = 'Deleted';
+        $message = $creatorProject->user->username . ' removed you from the project ' . $event->title . '.';
+        $url = '/';
+
+        Notification::send($user, new AllNotification($title, $type, $message, $url));
+
+        Project::destroy($projectId);
+
+        return response()->json([
+            'success' => 'A user has been removed from the project successfully.',
+        ]);
+    }
+
+    public function upload(Request $request)
+    {
+        $request->validate([
+            'event_id' => 'required',
+            'photo' => 'required|image|mimes:jpeg,png,jpg,gif',
+        ]);
+
+        $photo = $request->file('photo');
+        $eventId = $request->event_id;
+
+        $fileName = time() . '.' . $photo->getClientOriginalExtension();
+        $photo->move(public_path('covers'), $fileName);
+
+        $event = Event::find($eventId);
+
+        if ($event) {
+            if ($event->cover_photo) {
+                $oldCoverPhotoPath = public_path($event->cover_photo);
+                if (file_exists($oldCoverPhotoPath)) {
+                    unlink($oldCoverPhotoPath);
+                }
+            }
+
+            $event->cover_photo = 'covers/' . $fileName;
+            $event->save();
+
+            // Planning Log
+            $user = Auth::user();
+            $description = $user->username . ' changed the event\'s cover photo.';
+            $planningLog = new PlanningLog([
+                'event_id' => $eventId,
+                'status' => 'updated',
+                'description' =>  $description,
+            ]);
+            $user->planningLog()->save($planningLog);
+
+            $creator = User::findOrFail($event->creator_id);
+
+            // Notification
+            if ($user->id !== $event->creator_id) {
+                $title = 'Event Cover Photo Updated ';
+                $type = 'Updated';
+                $message = $user->username . ' updated the event\'s cover photo.';
+                $url = '/events/plan/' . $event->id;
+
+                Notification::send($creator, new AllNotification($title, $type, $message, $url));
+            }
+
+            return redirect()->back()->with('success-cover', 'Event cover picture has been updated successfully.');
+        } else {
+            return redirect()->back()->with('error-cover', 'Event not found.');
         }
     }
 }

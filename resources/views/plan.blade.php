@@ -20,6 +20,19 @@ $user = Auth::user();
 .floating-button {
     position: absolute;
     bottom: 0;
+    left: 0;
+    margin: 20px;
+    padding: 10px 24px;
+    font-size: 14px;
+    border-radius: 50px;
+    border: none;
+    cursor: pointer;
+    opacity: 0.6;
+}
+
+.floating-button-1 {
+    position: absolute;
+    bottom: 0;
     right: 0;
     margin: 20px;
     padding: 10px 24px;
@@ -61,25 +74,35 @@ $user = Auth::user();
                     <span class="text-white">{{ $event->title }}</span>
                 </li>
                 <li class="nav-item d-flex justify-content-end align-items-center">
-                    <img src="{{ asset($user->profile_picture) }}" alt="Avatar" style="height: 36.5px; width: 36.5px; z-index: 99; margin-right: -7px;" class="rounded-circle">
-                    {{-- display 5 users that is in this project --}}
-                    <img src="https://images.nationalgeographic.org/image/upload/v1638892272/EducationHub/photos/hoh-river-valley.jpg" alt="Avatar" style="height: 36.5px; width: 36.5px; z-index: 2; margin-right: -7px;" class="rounded-circle">
-                    <img src="https://images.nationalgeographic.org/image/upload/v1638892272/EducationHub/photos/hoh-river-valley.jpg" alt="Avatar" style="height: 36.5px; width: 36.5px; z-index: 1; margin-right: -7px;" class="rounded-circle">
+                    @if ($projectUsers->isEmpty())
+                        <p>No users associated with this project.</p>
+                    @else
+                        @php
+                            $zIndex = 10;
+                        @endphp
+                        @foreach ($projectUsers as $projectUser)
+                            <img src="@if ($projectUser->user->profile_picture == null) {{ asset('asset/blank_profile.jpg') }} @else {{ asset($projectUser->user->profile_picture) }} @endif" alt="Avatar" style="height: 36.5px; width: 36.5px; z-index: {{ $zIndex }}; margin-right: -7px;" class="rounded-circle">
+                            @php
+                                $zIndex--;
+                            @endphp
+                        @endforeach
+                    @endif
 
                     @if($project->role == 'creator')
                     <div class="dropdown">
                         <button class="btn text-light rounded-4 dropdown-toggle" style="background-color: #4AA2FA;" type="button" data-bs-toggle="dropdown" aria-expanded="false">
                             <i class="fas fa-plus"></i>
                         </button>
-                        <div class="dropdown-menu dropdown-menu-end" style="max-height: 410px; overflow-y: auto;">
+                        <div class="dropdown-menu dropdown-menu-end">
                             <div class="mx-2 mb-2 input-group" style="font-size: 16px; width: 320px;">
                                 <input type="text" class="form-control" name="search_user" id="search-user" placeholder="Search email" style="border-right: none;">
                                 <span class="input-group-text"><i class="fa-solid fa-magnifying-glass"></i></span>
                             </div>
                             <hr class="m-0">
-                            {{-- display members first then update when someone is being searched --}}
-                            <div id="display-users" class="p-3 text-center">
-                                Search for users to include in this project
+                            <div id="display-users" class="px-3 text-center pt-3" style="max-height: 410px; overflow-y: auto;">
+                                <div class="pb-2">
+                                    Search for users to include in this project
+                                </div>
                             </div>
                         </div>
                     </div>
@@ -92,12 +115,61 @@ $user = Auth::user();
 <div class="cover">
     @if ($event->cover_photo)
     <img src="{{ asset($event->cover_photo) }}" alt="Your Image">
+    @if($event->status == 'Planning')
+    <button class="floating-button me-3" type="button" data-bs-toggle="modal" data-bs-target="#changeCoverModal">Update Cover Photo</button>
+    @endif
     @else
     <img src="https://developers.elementor.com/docs/assets/img/elementor-placeholder-image.png" alt="Your Image">
+    @if($event->status == 'Planning')
+    <button class="floating-button me-3" type="button" data-bs-toggle="modal" data-bs-target="#changeCoverModal">Upload Cover Photo</button>
     @endif
-    <button class="floating-button me-3">Edit Cover Photo</button>
+    @endif
+    <a class="floating-button-1 btn btn-light me-3" href="{{ route('preview', $event->id) }}">View Preview</a>
+    <!-- Modal -->
+    <div class="modal fade" id="changeCoverModal" tabindex="-1" aria-labelledby="changePhotoModalLabel" aria-hidden="true">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header bg-primary" style="padding: 6px 18px;">
+                    <i class="fa-solid text-light me-2 fa-camera"></i>
+                    <h4 class="text-light m-0 modal-title fs-5">Upload Cover Photo</h4>
+                    <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <form action="{{ route('upload.cover') }}" id="cover-form" method="post" enctype="multipart/form-data" class="container">
+                    <div class="modal-body px-0">
+                        <figure class="image-container mx-auto mb-3 rounded" style="height: 210px; overflow:hidden; display: none;">
+                            <img id="chosen-image">
+                        </figure>
+
+                        @csrf
+                        <input type="hidden" name="event_id" value="{{ $event->id }}">
+                        
+                        <input type="file" id="upload-button" name="photo" accept="image/*">
+                        <label for="upload-button" class="upload-label">
+                            <i class="fas fa-upload"></i> &nbsp; Select Photo
+                        </label>
+                    </div>
+                    
+                    <div class="modal-footer">
+                        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+                        <button type="submit" class="btn btn-primary">Upload</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
 </div>
 <div class="container mt-3">
+    @if(session('success-cover'))
+        <div class="alert alert-success alert-dismissible fade show" role="alert">
+            {{ session('success-cover') }}
+            <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+        </div>
+    @elseif(session('error-cover'))
+        <div class="alert alert-danger alert-dismissible fade show" role="alert">
+            {{ session('error-cover') }}
+            <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+        </div>
+    @endif
     <ul class="nav nav-pills mb-3" id="pills-tab" role="tablist">
         <li class="nav-item" role="presentation">
             <button class="nav-link dash-tab active" id="details-tab" data-bs-toggle="pill" data-bs-target="#details-tab-content" type="button" role="tab" aria-controls="details-tab-content" aria-selected="true">Event Details</button>
@@ -119,20 +191,46 @@ $user = Auth::user();
                 <div class="col-lg-12 mb-4">
                 @endif
                     <span class="text" style="font-size: 24px;">Event Details</span>
-                    <div class="row ms-4 w-100 mt-2">
-                        <div class="col-md-4">
-                            <p class="text-capitalize"><strong>Event type:</strong> &nbsp; {{ $event->event_type }}</p>
-                            <p class="text-capitalize"><strong>Target Audience:</strong> &nbsp; {{ $event->target_audience }}</p>
+                    <div class="row">
+                        <div class="col-md-5">
+                            <div class="mt-2 d-flex align-items-start justify-content-start pt- ps-3 h-100 flex-column">
+                                <h6 class="text-capitalize m-0"><strong>Event type:</strong></h6>
+                                <h6 class="text-capitalize mb-3">{{ $event->event_type }}</h6>
+                                
+                                <h6 class="text-capitalize m-0"><strong>Target Audience:</strong></h6>
+                                <h6 class="text-capitalize mb-3">{{ $event->target_audience }}</h6>
+                            </div>
                         </div>
-                        <div class="col-md-8">
-                            <p><strong>Start and End Date:</strong> &nbsp; {{ Carbon::parse($event->start_date)->format('M d') }} - {{ Carbon::parse($event->end_date)->subDay()->format('M d') }}</p>
-                            <p class="text-capitalize"><strong>Main Venue:</strong> &nbsp; {{ $event->venue->venue_name }} </p>
+                        <div class="col-md-5">
+                            <div class="mt-2 d-flex align-items-start justify-content-start pt- ps-3 h-100 flex-column">
+                                <h6 class="text-capitalize m-0"><strong>Venue Capacity:</strong></h6>
+                                <h6 class="text-capitalize mb-3">{{ $event->venue->capacity }}</h6>
+                                
+                                <h6 class="m-0">From <strong>{{ Carbon::parse($event->start_date)->format('M d') }}</strong> <br>to <strong>{{ Carbon::parse($event->end_date)->subDay()->format('M d') }}</strong></h6>
+                            </div>
                         </div>
                     </div>
                     <hr class="mt-2">
-                    <span class="text" style="font-size: 24px;">Description</span>
+                    <span class="text" style="font-size: 24px;">Main Venue</span>
+                    <div class="mt-2 mx-auto mb-3 rounded" style="height: 210px; overflow: hidden;">
+                        @if ($event->venue->image)
+                        <img src="{{ asset($event->venue->image) }}" class="mx-3 rounded" style="width: 100%; height: 100%; object-fit: cover;">
+                        @else
+                        <img src="https://developers.elementor.com/docs/assets/img/elementor-placeholder-image.png" class="mx-3 rounded" style="width: 100%; height: 100%; object-fit: cover;">
+                        @endif
+                    </div>  
+                    @if ($event->venue->image)
+                    <div class="w-100 small text-secondary text-center" style="margin-top: -10px">
+                        <p>{{ $event->venue->venue_name }}</p>
+                    </div>
+                    @else
+                    <div class="w-100 small text-secondary text-center" style="margin-top: -10px">
+                        <p>{{ $event->venue->venue_name . ' - ' . $event->venue->campus }}. (No image available for this venue.)</p>
+                    </div>
+                    @endif 
+                    <span class="text" style="font-size: 24px;">Event Description</span>
                     <div class="row ms-4 mt-2"> 
-                        <div class="col-md-12" id="displayDescription" data-full-description="{{ $event->description }}">
+                        <div class="col-md-12" id="displayDescription" @if($event->description) data-full-desc-flag="0" @else data-full-desc-flag="1" @endif data-full-description="{{ $event->description }}">
                             @if($event->description)
                                 {{ $event->description }}
                             @else
@@ -166,95 +264,199 @@ $user = Auth::user();
                                 <button type="submit" class="updateEventStatusBtn btn btn-dark w-100 my-2">Edit Event Details</button>
                                 @endif
                             </form>
+                            @if($event->status == 'Planning')                          
                             <small class="form-text text-muted">Note: Activating the event indicates that the planning phase has been completed and that no user can edit the event unless it is set back to the planning phase. Additionally, activating the event will display it as active.</small>
+                            @elseif($event->status == 'Active')
+                            <small class="form-text text-muted">Note: Entering edit mode will render the event inactive and prevent other users from adding it to their favorites and will not accept registrations.</small>
+                            @elseif($event->status == 'Happening')
+                            <small class="form-text text-muted">Note: The event has commenced, and editing is no longer available.</small>
+                            @endif
                             <hr class="mt-3 mb-1">
                         </div>
-                        @if($event->status == 'Planning')
                         <div class="col-md-12 mt-3">
-                            <button class="btn btn-dark w-100 mb-3 p-2" data-bs-toggle="modal" data-bs-target="#rescheduleModal">Reschedule Event</button>
-                            <small class="form-text text-muted">Note: Rescheduling an event requires approval from the admin and may take some time. Please provide a reason for rescheduling the event</small>
+                            <span class="text" style="font-size: 24px;">Photos</span>
+                            <div class="row mx-3 mt-2 flex-row p-0 flex-nowrap overflow-auto wrapper">
+                                @if ($images->isNotEmpty())
+                                    @foreach ($images as $image)
+                                        <img
+                                            src="{{ asset($image->path) }}"
+                                            style="object-fit: cover; width: 100%; cursor: pointer;"
+                                            alt="Event Photo"
+                                            class="p-0 m-0 rounded img-fluid me-3 preview-image"
+                                            data-bs-toggle="modal"
+                                            data-bs-target="#imagePreviewModal"
+                                            data-image-path="{{ asset($image->path) }}"
+                                        >
+                                    @endforeach
+                                @else
+                                    <div class="w-100 text-center p-5">
+                                        <p>No images available for this event.</p>
+                                    </div>
+                                @endif
 
-                            <div class="modal fade" id="rescheduleModal" tabindex="-1" aria-labelledby="rescheduleModal" aria-hidden="true">
+                                <!-- Modal for Image Preview -->
+                                <div class="modal fade" id="imagePreviewModal" tabindex="-1" aria-labelledby="imagePreviewModalLabel" aria-hidden="true">
+                                    <div class="modal-dialog modal-lg">
+                                        <div class="modal-content">
+                                            <div class="modal-header">
+                                                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                                            </div>
+                                            <div class="modal-body">
+                                                <img id="previewImage" class="w-100 rounded" alt="Event Photo">
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                            @if($event->status == 'Planning')
+                            <div class="d-flex justify-content-center">
+                                <button class="btn btn-primary w-100" data-bs-toggle="modal" data-bs-target="#uploadImagesModal">
+                                    <i class="fas fa-plus"></i> Upload Event Images
+                                </button>
+                            </div>
+                            @endif
+
+                            <!-- Modal -->
+                            <div class="modal fade" id="uploadImagesModal" tabindex="-1" aria-labelledby="uploadImagesModalLabel" aria-hidden="true">
                                 <div class="modal-dialog">
                                     <div class="modal-content">
                                         <div class="modal-header">
-                                            <h1 class="modal-title fs-5 fw-bold" id="rescheduleModal">Reschedule Event</h1>
-                                            <button type="button" class="btn-close" id="reschedule-btn" data-bs-dismiss="modal" aria-label="Close"></button>
+                                            <h5 class="modal-title" id="uploadImagesModalLabel">Upload Event Images</h5>
+                                            <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
                                         </div>
                                         <div class="modal-body">
-                                            <small class="form-text text-muted">Note: Please set the end date to be at least one day after the actual end date of the event. For example, if the event starts on July 20, set the end date to July 21 or later to ensure accurate scheduling.</small>
-
-                                            <form id="reschedule-event-form" class="row px-2 g-3 pt-2">
+                                            <small class="form-text text-muted">Note: Uploading new images will replace the old images. Make sure to finalize and upload all images in one go.</small>
+                                            <form id="uploadImagesForm" enctype="multipart/form-data">
                                                 @csrf
+                                                <div id="image-preview-container"></div>
 
-                                                <input type="hidden" name="event_id" value={{ $event->id }}>
-
-                                                <div class="col-md-6">
-                                                    <label class="form-label">Start</label>
-                                                    <input type="date" value="{{ \Carbon\Carbon::parse($event->start_date)->format('Y-m-d') }}" class="form-control" id="event-start" name="event_start">
-                                                    <div id="event-start-error" class="form-error mt-2 text-danger small d-none"></div>
-                                                </div>
-
-                                                <div class="col-md-6">
-                                                    <label for="event-end" class="form-label">End</label>
-                                                    <input type="date" value="{{ \Carbon\Carbon::parse($event->end_date)->format('Y-m-d') }}" class="form-control" id="event-end" name="event_end">
-                                                    <div id="event-end-error" class="form-error mt-2 text-danger small d-none"></div>
-                                                </div>
-
-                                                <div class="col-md-12">
-                                                    <div id="event-date-error" style="margin-top: -12px;" class="form-error text-danger small d-none"></div>
-                                                </div>
-
-                                                <div class="col-md-12">
-                                                    <label for="reason" class="form-label">Reason</label>
-                                                    <textarea name="reason" class="form-control" id="reason" placeholder="Please provide the reason for rescheduling the event" rows="3"></textarea>
-                                                    
-                                                    <div id="reason-error" class="form-error mt-2 text-danger small d-none"></div>
-                                                </div>
-                                            </div>
-                                            <div class="modal-footer">
-                                                <button type="submit" class="btn btn-primary">Request New Schedule</button>
+                                                <input id="event-images-upload" type="file" name="images[]" multiple accept="image/*">
+                                                <div class="text-danger" id="uploadImagesError"></div>
+                                                <label for="event-images-upload" class="upload-label">
+                                                    <i class="fas fa-upload"></i> &nbsp; Select Images
+                                                </label>
                                             </form>
+                                        </div>
+                                        <div class="modal-footer">
+                                            <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+                                            <button type="button" class="btn btn-primary" id="submitImagesBtn">Upload</button>
                                         </div>
                                     </div>
                                 </div>
                             </div>
                             <hr class="mt-3 mb-1">
                         </div>
-                        @endif
-                        <div class="col-md-12 mt-3">
-                            @if($project->role == 'creator') 
-                                <form action="{{ route('delete.event') }}" method="POST">
-                                    @csrf
+                        @if($event->status == 'Planning')
+                            @if($project->role == 'creator')
+                            <div class="col-md-12 mt-2">
+                                <span class="text" style="font-size: 24px;">Manage Event</span>
+                                <button class="btn btn-dark w-100 mt-3 p-2" data-bs-toggle="modal" data-bs-target="#membersModal"><i class="fa-solid fa-users me-2"></i> Manage Project Members</button>
 
-                                    <input type="hidden" name="event_id" value="{{ $event->id }}">
+                                <div class="modal fade" id="membersModal" tabindex="-1" aria-labelledby="membersModal" aria-hidden="true">
+                                    <div class="modal-dialog">
+                                        <div class="modal-content">
+                                            <div class="modal-header">
+                                                <h1 class="modal-title fs-5 fw-bold" id="membersModal"> Project Members</h1>
+                                                <button type="button" class="btn-close" id="reschedule-btn" data-bs-dismiss="modal" aria-label="Close"></button>
+                                            </div>
+                                            <div class="modal-body overflow-y-auto" style="max-height: 430px">
+                                                @if ($projectUsers->isEmpty())
+                                                    <p>No users associated with this project.</p>
+                                                @else
+                                                    @foreach ($projectUsers as $projectUser)
+                                                    <div class="d-flex align-items-center justify-content-between w-100 pb-2">
+                                                        <div class="row">
+                                                            <div class="col-md d-flex align-items-center justify-content-center">
+                                                                <img src="@if ($projectUser->user->profile_picture == null) {{ asset('asset/blank_profile.jpg') }} @else {{ asset($projectUser->user->profile_picture) }} @endif" alt="Avatar" style="height: 36.5px; width: 36.5px; z-index: 2; margin-right: -7px;" class="rounded-circle">
+                                                            </div>
+                                                            <div class="col-md ps-1 text-start">
+                                                                <div class="d-flex">
+                                                                    <p class="m-0">{{ $projectUser->user->username }} </p>
+                                                                    <span class="ms-1 text-capitalize">{{ '(' . $projectUser->role . ')' }}</span>
+                                                                </div>
+                                                                <div class="small text-secondary">{{ $projectUser->user->email }}</div>
+                                                            </div>
+                                                        </div>
+                    
+                                                        <div>
+                                                            @if ($projectUser->role == 'member')
+                                                            <button class="btn btn-danger remove-user-btn" data-id="{{ $projectUser->id }}" data-username="{{ $projectUser->user->username }}"><i class="fa-solid fa-xmark"></i></button>
+                                                            @endif
+                                                        </div>
+                                                    </div>
+                                                    @endforeach
+                                                @endif
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="col-md-12 mt-2">
+                                <button class="btn btn-dark w-100 mb-3 mt-3 p-2" data-bs-toggle="modal" data-bs-target="#rescheduleModal"><i class="fa-regular fa-clock me-2"></i> Reschedule Event</button>
 
-                                    <button class="btn btn-danger w-100 mb-3 p-2" id="deleteEventBtn" type="submit">Delete Event</button>
-                                    <small class="form-text text-muted">Note: Deleting the event will permanently remove all associated records and data related to this event.</small>
-                                </form>
-                                <hr class="mt-3 mb-1">
+                                <div class="modal fade" id="rescheduleModal" tabindex="-1" aria-labelledby="rescheduleModal" aria-hidden="true">
+                                    <div class="modal-dialog">
+                                        <div class="modal-content">
+                                            <div class="modal-header">
+                                                <h1 class="modal-title fs-5 fw-bold" id="rescheduleModal">Reschedule Event</h1>
+                                                <button type="button" class="btn-close" id="reschedule-btn" data-bs-dismiss="modal" aria-label="Close"></button>
+                                            </div>
+                                            <div class="modal-body">
+                                                <small class="form-text text-muted">Note: Please set the end date to be at least one day after the actual end date of the event. For example, if the event starts on July 20, set the end date to July 21 or later to ensure accurate scheduling.</small>
+
+                                                <form id="reschedule-event-form" class="row px-2 g-3 pt-2">
+                                                    @csrf
+
+                                                    <input type="hidden" name="event_id" value={{ $event->id }}>
+
+                                                    <div class="col-md-6">
+                                                        <label class="form-label">Start</label>
+                                                        <input type="date" value="{{ \Carbon\Carbon::parse($event->start_date)->format('Y-m-d') }}" class="form-control" id="event-start" name="event_start">
+                                                        <div id="event-start-error" class="form-error mt-2 text-danger small d-none"></div>
+                                                    </div>
+
+                                                    <div class="col-md-6">
+                                                        <label for="event-end" class="form-label">End</label>
+                                                        <input type="date" value="{{ \Carbon\Carbon::parse($event->end_date)->format('Y-m-d') }}" class="form-control" id="event-end" name="event_end">
+                                                        <div id="event-end-error" class="form-error mt-2 text-danger small d-none"></div>
+                                                    </div>
+
+                                                    <div class="col-md-12">
+                                                        <div id="event-date-error" style="margin-top: -12px;" class="form-error text-danger small d-none"></div>
+                                                    </div>
+
+                                                    <div class="col-md-12">
+                                                        <label for="reason" class="form-label">Reason</label>
+                                                        <textarea name="reason" class="form-control" id="reason" placeholder="Please provide the reason for rescheduling the event" rows="3"></textarea>
+                                                        
+                                                        <div id="reason-error" class="form-error mt-2 text-danger small d-none"></div>
+                                                    </div>
+                                                </div>
+                                                <div class="modal-footer">
+                                                    <button type="submit" class="btn btn-primary">Request New Schedule</button>
+                                                </form>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="col-md-12 card mt-2">
+                                <div class="card-body">
+                                    <form action="{{ route('delete.event') }}" method="POST">
+                                        @csrf
+    
+                                        <input type="hidden" name="event_id" value="{{ $event->id }}">
+    
+                                        <button class="btn btn-danger w-100 mb-3 p-2" id="deleteEventBtn" type="submit">Delete Event</button>
+                                        <small class="form-text text-muted">Note: Deleting the event will permanently remove all associated records and data related to this event.</small>
+                                    </form>
+                                </div>
+                            </div>
                             @endif
-                        </div>
+                            <hr class="mt-3 mb-2">
+                        @endif
                         <div class="col-12">
-                            <!-- <span class="text" style="font-size: 24px;">Photos</span>
-                            <div class="row flex-row flex-nowrap overflow-auto wrapper">
-                                display photos where event_id == to this.event_id
-                                <img src="https://images.nationalgeographic.org/image/upload/v1638892272/EducationHub/photos/hoh-river-valley.jpg" style="object-fit: coevr; width: 100%;" alt="Event Photo" class="img-fluid mb-3">    
-                                <img src="https://images.nationalgeographic.org/image/upload/v1638892272/EducationHub/photos/hoh-river-valley.jpg" style="object-fit: coevr; width: 100%;" alt="Event Photo" class="img-fluid mb-3">    
-                                <img src="https://images.nationalgeographic.org/image/upload/v1638892272/EducationHub/photos/hoh-river-valley.jpg" style="object-fit: coevr; width: 100%;" alt="Event Photo" class="img-fluid mb-3">    
-                                <img src="https://images.nationalgeographic.org/image/upload/v1638892272/EducationHub/photos/hoh-river-valley.jpg" style="object-fit: coevr; width: 100%;" alt="Event Photo" class="img-fluid mb-3">    
-                            </div>
-                            <div class="d-flex justify-content-center">
-                                <button class="btn btn-primary w-100"><i class="fas fa-plus"></i> Add Photo</button>
-                            </div>
-                            <hr class="mb-3">
-                            <span class="text" style="font-size: 24px;">Share</span>
-                            <div class="d-flex g-2 w-100">
-                                <a href="#"><i class="fab fa-facebook fa-2x text-primary me-2 ms-4"></i></a>
-                                <a href="#"><i class="fab fa-instagram fa-2x text-danger"></i></a>
-                            </div>
-                            <hr> -->
-                            <p>Last Updated 4 days ago</p>
+                            <p>Last Updated at {{ Carbon::parse($event->updated_at)->format('M d, Y') }}</p>
                         </div>
                     </div>
                 </div>
@@ -634,9 +836,34 @@ $user = Auth::user();
 @section('script')
 <script src="https://cdnjs.cloudflare.com/ajax/libs/moment.js/2.29.1/moment.min.js"></script>
 <script>
+    var assetUrl = "{{ asset('') }}";
     $(document).ready(function() {
+        // Upload Photo
+        $("#upload-button").change(function() {
+            let reader = new FileReader();
+            reader.readAsDataURL(this.files[0]);
+            reader.onload = function() {
+                $("#chosen-image").attr("src", reader.result);
+                $(".image-container").show();
+            };
+        });
+
+        $("#cover-form").submit(function(event) {
+            if ($("#upload-button")[0].files.length === 0) {
+                
+                Swal.fire({
+                    icon: 'error',
+                    title: 'Oops...',
+                    text: 'Please select a photo before uploading.',
+                    confirmButtonColor: '#3085d6',
+                    confirmButtonText: 'OK'
+                });
+                event.preventDefault(); // Prevent form submission
+            }
+        });
+
         // cookies
-        let lastActiveTab = getCookie("activeTabDash");
+        let lastActiveTab = getCookie("activeTabPlan");
         if (lastActiveTab) {
             $('.dash-tab').removeClass('active');
             $(`#${lastActiveTab}`).addClass('active');
@@ -646,7 +873,7 @@ $user = Auth::user();
 
         $('.dash-tab').click(function() {
             let activeTabId = $(this).attr('id');
-            setCookie("activeTabDash", activeTabId, 4);
+            setCookie("activeTabPlan", activeTabId, 4);
             let activeContentId = `${activeTabId}-content`;
             $('.tab-pane').removeClass('show active');
             $(`#${activeContentId}`).addClass('show active');
@@ -687,8 +914,9 @@ $user = Auth::user();
                 data: formData,
                 success: function(response){
                     var updatedDescription = response.description;
-
+                    
                     $("#displayDescription").text(updatedDescription);
+                    $("#displayDescription").data('full-desc-flag', 0);
 
                     $("#displayDescription").toggle();
                     $("#editDescriptionForm").toggle();
@@ -761,6 +989,7 @@ $user = Auth::user();
                             title: 'Flow Created',
                             text: 'Flow has been created successfully.',
                             icon: 'success',
+                            confirmButtonColor: '#3085d6',
                             confirmButtonText: 'OK'
                         }).then((result) => {
                             if (result.isConfirmed) {
@@ -817,6 +1046,7 @@ $user = Auth::user();
                             title: 'Flow Updated',
                             text: 'Flow has been updated successfully.',
                             icon: 'success',
+                            confirmButtonColor: '#3085d6',
                             confirmButtonText: 'OK'
                         }).then((result) => {
                             if (result.isConfirmed) {
@@ -890,6 +1120,7 @@ $user = Auth::user();
                             title: 'Event Person Added',
                             text: 'Event person has been added to the event successfully.',
                             icon: 'success',
+                            confirmButtonColor: '#3085d6',
                             confirmButtonText: 'OK'
                         }).then((result) => {
                             if (result.isConfirmed) {
@@ -945,6 +1176,7 @@ $user = Auth::user();
                             title: 'Event Person Updated',
                             text: 'Event person has been updated successfully.',
                             icon: 'success',
+                            confirmButtonColor: '#3085d6',
                             confirmButtonText: 'OK'
                         }).then((result) => {
                             if (result.isConfirmed) {
@@ -982,15 +1214,38 @@ $user = Auth::user();
             });
         });
 
-        // validate desc before activating event
+        // validate desc, flows, and event people before activating event
         $('.updateEventStatusBtn').click(function (event) {
             event.preventDefault();
-
-            @if($event->description === null)
+            
+            var fullDescFlag = $("#displayDescription").data("full-desc-flag");
+            if (fullDescFlag) {
                 Swal.fire({
                     icon: 'warning',
                     title: 'Oops...',
                     text: 'You need to have a description for this event first',
+                    confirmButtonColor: '#3085d6',
+                    confirmButtonText: 'OK'
+                });
+                return;
+            }
+
+            @if ($segment->flows->isEmpty())
+                Swal.fire({
+                    icon: 'warning',
+                    title: 'Oops...',
+                    text: 'Event needs to have event flow before activation.',
+                    confirmButtonColor: '#3085d6',
+                    confirmButtonText: 'OK'
+                });
+                return;
+            @endif
+
+            @if ($peoples->isEmpty())
+                Swal.fire({
+                    icon: 'warning',
+                    title: 'Oops...',
+                    text: 'Event needs to set event people first before activation.',
                     confirmButtonColor: '#3085d6',
                     confirmButtonText: 'OK'
                 });
@@ -1011,6 +1266,7 @@ $user = Auth::user();
                 }
             });
         });
+
 
         // delete event
         $('#deleteEventBtn').click(function (event) {
@@ -1104,6 +1360,198 @@ $user = Auth::user();
                     console.error(xhr.responseText);
                 }
             });
+        });
+
+        $('#search-user').on('input', function () {
+            var searchTerm = $(this).val();
+
+            $.ajax({
+                type: 'GET',
+                url: "{{ route('search.users') }}",
+                data: { searchTerm: searchTerm, projectId: {{ $project->id }} },
+                success: function (response) {
+                    var displayUsers = $('#display-users');
+                    displayUsers.empty();
+
+                    if (response.users.length > 0) {
+                        $.each(response.users, function (index, user) {
+                            var profilePictureSrc = user.profile_picture ? `${assetUrl}${user.profile_picture}` : `${assetUrl}asset/blank_profile.jpg`;
+                            var userItem = `
+                                <div class="d-flex align-items-center justify-content-between w-100 pb-2">
+                                    <div class="row">
+                                        <div class="col-md d-flex align-items-center justify-content-center">
+                                            <img src="${profilePictureSrc}" alt="Avatar" style="height: 36.5px; width: 36.5px; z-index: 2; margin-right: -7px;" class="rounded-circle">
+                                        </div>
+                                        <div class="col-md ps-1 text-start">
+                                            <div class="">
+                                                ${user.username}
+                                            </div>
+                                            <div class="small text-secondary">
+                                                ${user.email}
+                                            </div>
+                                        </div>
+                                    </div>
+
+                                    <div>
+                                        <button class="btn btn-primary add-user-btn" data-id="${user.id}" data-username="${user.username}"><i class="fa-solid fa-plus"></i></button>
+                                    </div>
+                                </div>
+                            `;
+
+                            displayUsers.append(userItem);
+                        });
+                    } else {
+                        displayUsers.html('No users found.');
+                    }
+                },
+                error: function (xhr, status, error) {
+                    console.error(xhr.responseText);
+                }
+            });
+        });
+
+        $(document).on('click', '.add-user-btn', function () {
+            var userId = $(this).data('id');
+            var username = $(this).data('username');
+
+            Swal.fire({
+                title: 'Add User to Project?',
+                text: 'Are you sure you want to add ' + username + ' to the project?',
+                icon: 'question',
+                showCancelButton: true,
+                confirmButtonColor: '#3085d6',
+                confirmButtonText: 'Yes, add!',
+                cancelButtonText: 'Cancel',
+            }).then((result) => {
+                if (result.isConfirmed) {
+                    $.ajax({
+                        type: 'POST',
+                        url: "{{ route('project.add-user') }}",
+                        data: {
+                            "_token" : "{{ csrf_token() }}",
+                            "userId" : userId,
+                            "eventId" : "{{ $event->id }}",
+                        },
+                        success: function (response) {
+                            if (response.success) {
+                                Swal.fire({
+                                    title: 'Success!',
+                                    text: 'User has been added to this project successfully.',
+                                    icon: 'success',
+                                    confirmButtonColor: '#3085d6',
+                                    confirmButtonText: 'OK'
+                                }).then((result) => {
+                                    if (result.isConfirmed) {
+                                        location.reload();
+                                    }
+                                });
+                            } else {
+                                Swal.fire('Error!', 'Failed to add user to the project.', 'error');
+                            }
+                        },
+                        error: function (xhr, status, error) {
+                            console.error(xhr.responseText);
+                            Swal.fire('Error!', 'Failed to add user to the project.', 'error');
+                        }
+                    });
+                }
+            });
+        });
+
+        
+        $('.remove-user-btn').on('click', function () {
+            var projectId = $(this).data('id');
+            var username = $(this).data('username');
+            Swal.fire({
+                title: 'Remove ' + username + '?',
+                text: 'Are you sure you want to remove ' + username + ' from the project?',
+                icon: 'question',
+                showCancelButton: true,
+                confirmButtonColor: '#3085d6',
+                confirmButtonText: 'Yes',
+                cancelButtonText: 'Cancel',
+            }).then((result) => {
+                if (result.isConfirmed) {
+                    $.ajax({
+                        type: 'POST',
+                        url: "{{ route('project.remove-user') }}",
+                        data: {
+                            "_token" : "{{ csrf_token() }}",
+                            "projectId" : projectId,
+                            "eventId" : "{{ $event->id }}",
+                        },
+                        success: function (response) {
+                            if (response.success) {
+                                Swal.fire({
+                                    title: 'Success!',
+                                    text: 'User has been removed from this project successfully.',
+                                    icon: 'success',
+                                    confirmButtonColor: '#3085d6',
+                                    confirmButtonText: 'OK'
+                                }).then((result) => {
+                                    if (result.isConfirmed) {
+                                        location.reload();
+                                    }
+                                });
+                            } else {
+                                Swal.fire('Error!', 'Failed to remove user from the project.', 'error');
+                            }
+                        },
+                        error: function (xhr, status, error) {
+                            console.error(xhr.responseText);
+                            Swal.fire('Error!', 'Failed to remove user from the project.', 'error');
+                        }
+                    });
+                }
+            });
+        });
+
+        // Upload images
+        $('#event-images-upload').change(function () {
+            $('#image-preview-container').html('');
+
+            for (var i = 0; i < this.files.length; i++) {
+                var reader = new FileReader();
+                reader.onload = function (e) {
+                    $('#image-preview-container').append('<img src="' + e.target.result + '" class="img-thumbnail" style="max-width: 100px; max-height: 100px; margin: 5px;">');
+                };
+                reader.readAsDataURL(this.files[i]);
+            }
+        });
+
+        $('#submitImagesBtn').click(function () {
+            var formData = new FormData($('#uploadImagesForm')[0]);
+            $.ajax({
+                type: 'POST',
+                url: '{{ route("upload.images", ["eventId" => $event->id]) }}',
+                data: formData,
+                processData: false,
+                contentType: false,
+                success: function (response) {
+                    $('#uploadImagesModal').modal('hide');
+                    Swal.fire({
+                        title: 'Success!',
+                        text: 'Event photos has been uploaded succesfully',
+                        icon: 'success',
+                        confirmButtonColor: '#3085d6',
+                        confirmButtonText: 'OK'
+                    }).then((result) => {
+                        if (result.isConfirmed) {
+                            location.reload();
+                        }
+                    });
+                },
+                error: function (xhr, status, error) {
+                    var errorMessage = xhr.responseText ? JSON.parse(xhr.responseText).message : 'Error uploading images.';
+                    $('#uploadImagesError').html(errorMessage);
+                }
+            });
+        });
+
+        $('.preview-image').on('click', function () {
+            var imagePath = $(this).data('image-path');
+
+            $('#previewImage').attr('src', imagePath);
         });
     });
 </script>

@@ -12,23 +12,23 @@
         </div>
         <ul class="nav-list">
             <li>
-                <a href="{{ route('admin.dashboard') }}" class="active">
+                <a href="{{ route('dashboard') }}" class="active">
                     <i class="fa-solid fa-gauge"></i>
                     <span class="side-link-name">Home</span>
                 </a>
             </li>
             <li>
-                <a href="{{ route('admin.management') }}">
+                <a href="{{ route('projects') }}">
                     <i class="fa-solid fa-toolbox"></i>
                     <span class="side-link-name">Projects</span>
                 </a>
             </li>
-            <li>
+            {{-- <li>
                 <a href="">
                     <i class="fa-solid fa-calendar-days"></i>
                     <span class="side-link-name">Tasks</span>
                 </a>
-            </li>
+            </li> --}}
             <li>
                 <a href="{{ route('profile.edit', ['id' => Auth::user()->id]) }}">
                     <i class="fa-solid fa-gear"></i>

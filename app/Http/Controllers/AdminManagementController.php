@@ -12,18 +12,15 @@ use App\Models\Event;
 use App\Models\Project;
 use App\Models\Segment;
 use App\Models\User;
+use App\Notifications\AllNotification;
 use Carbon\Carbon;
+use Illuminate\Support\Facades\Notification;
 
 class AdminManagementController extends Controller
 {
     public function index()
     {
         $campus = session('campus');
-
-        // $users = User::whereHas('campusEntity', function($query) use ($campus) {
-        //     $query->where('campus', $campus);
-        // })->with(['campusEntity', 'organization'])->get();
-
         $departments = Department::select(
             'department_code',
             'department',
@@ -33,7 +30,6 @@ class AdminManagementController extends Controller
         ->orderBy('department')
         ->get();
 
-        // return view('user_admin.management', ['usersData' => $users, 'departmentsData' => $departments]);
         return view('user_admin.management', ['departmentsData' => $departments]);
     }
 
@@ -54,6 +50,7 @@ class AdminManagementController extends Controller
         $type = $validatedData['entity_type'];
         $audience = $validatedData['target_audience'];
         $venue = $validatedData['venue'];
+        $user = Auth::user();
         $userId = Auth::id();
         $campus = session('campus');
 
@@ -94,29 +91,57 @@ class AdminManagementController extends Controller
             ]);
         }
 
-        $event = Event::create([
-            'status' => 'Planning',
-            'title' => $title,
-            'start_date' => $start,
-            'end_date' => $end,
-            'creator_id' => $userId,
-            'campus' => $campus,
-            'venue_id' => $venue,
-            'event_type' => $type,
-            'target_audience' => $audience,
-        ]);
+        if ($user->role == "Organizer"){
+            $event = Event::create([
+                'title' => $title,
+                'start_date' => $start,
+                'end_date' => $end,
+                'creator_id' => $userId,
+                'campus' => $campus,
+                'venue_id' => $venue,
+                'event_type' => $type,
+                'target_audience' => $audience,
+            ]);
 
-        if ($event->status === 'Planning') {
-            $startDate = Carbon::parse($event->start_date);
-            $endDate = Carbon::parse($event->end_date)->subDay();
+            // Notify Admins and Co-Admins with manage_events flag:
+            $superAdmin = User::where('role', 'Admin')->get();
+            $coAdmin = User::where('role', 'Co-Admin')->where('manage_event', 1)->get();
 
-            while ($startDate <= $endDate) {
-                Segment::create([
-                    'event_id' => $event->id,
-                    'date' => $startDate,
-                ]);
+            $Admins = $superAdmin->merge($coAdmin)->unique();
 
-                $startDate->addDay();
+            foreach ($Admins as $admin) {
+                $title = 'Event Approval';
+                $type = 'Request';
+                $message = $user->username . ' is waiting for approval for their event titled "' . $event->title . '".';
+                $url = '/admin/approval';
+
+                Notification::send($admin, new AllNotification($title, $type, $message, $url));
+            }
+        } else {
+            $event = Event::create([
+                'status' => 'Planning',
+                'title' => $title,
+                'start_date' => $start,
+                'end_date' => $end,
+                'creator_id' => $userId,
+                'campus' => $campus,
+                'venue_id' => $venue,
+                'event_type' => $type,
+                'target_audience' => $audience,
+            ]);
+    
+            if ($event->status === 'Planning') {
+                $startDate = Carbon::parse($event->start_date);
+                $endDate = Carbon::parse($event->end_date)->subDay();
+    
+                while ($startDate <= $endDate) {
+                    Segment::create([
+                        'event_id' => $event->id,
+                        'date' => $startDate,
+                    ]);
+    
+                    $startDate->addDay();
+                }
             }
         }
 
@@ -138,18 +163,6 @@ class AdminManagementController extends Controller
                 'code' => 500
             ]);
         }
-
-        // for organizers
-        // $create = Event::create([
-        //     'title' => $title,
-        //     'start_date' => $start,
-        //     'end_date' => $end,
-        //     'creator_id' => $userId,
-        //     'campus' => $campus,
-        //     'venue_id' => $venue,
-        //     'event_type' => $type,
-        //     'target_audience' => $audience,
-        // ]);
     }
     
     public function getAdmins()

@@ -17,22 +17,12 @@ $user = Auth::user();
             <i class="fa-solid fa-bars" id="menu-btn"></i>
         </div>
         <ul class="nav-list">
-            @if ( $user->role == "Organizer" )
             <li>
-                <!-- todo: organizer home -->
-                <a href="{{ route('admin.dashboard') }}">
+                <a href="{{ route('dashboard') }}">
                     <i class="fa-solid fa-gauge"></i>
                     <span class="side-link-name">Home</span>
                 </a>
             </li>
-            @else
-            <li>
-                <a href="{{ route('admin.dashboard') }}">
-                    <i class="fa-solid fa-gauge"></i>
-                    <span class="side-link-name">Home</span>
-                </a>
-            </li>
-            @endif
             <li>
                 <a href="{{ route('projects') }}">
                     <i class="fa-solid fa-folder-open"></i>
@@ -71,7 +61,7 @@ $user = Auth::user();
         <div class="profile-content">
             <div class="profile">
                 <div class="profile-details">
-                    <img src="{{ asset($user->profile_picture) }}" alt="">
+                    <img src="@if (Auth::user()->profile_picture == null) {{ asset('asset/blank_profile.jpg') }} @else {{ asset(Auth::user()->profile_picture) }} @endif" alt="">
                     <div class="name-role">
                         <div class="user-name">{{ ucfirst(Auth::user()->username) }}</div>
                         <div class="user-campus">{{ session('campus') }}</div>
@@ -113,7 +103,7 @@ $user = Auth::user();
             </li>
             <div class="d-flex">
                 <li class="nav-item me-2">
-                    <a href="#" class="btn btn-primary px-4 rounded-pill mx-1">
+                    <a href="{{ route('home') }}" class="btn btn-primary px-4 rounded-pill mx-1">
                         <i class="fa-solid fa-globe me-2"></i>
                         Explore Events
                     </a>
@@ -134,18 +124,18 @@ $user = Auth::user();
                                 {{-- Notification Item --}}
                                 <a class="dropdown-item mark-as-read" href="{{ url($notification->data['url']) }}" data-id="{{ $notification->id }}">
                                     <div class="d-flex align-items-center p-2" style="width: 365px">
-                                        <div class="me-4">
+                                        {{-- <div class="me-4">
                                             <!-- icon -->
                                             icon
-                                        </div>
+                                        </div> --}}
                                         <div class="w-100">
                                             <div class="d-flex justify-content-between align-items-center">
-                                                <p class="fw-bold m-0" style="font-size: 16px">{{ $notification->data['title'] }}</p>
+                                                <p class="fw-bold m-0" style="font-size: 16px">{{ Illuminate\Support\Str::limit($notification->data['title'], 30) }}</p>
                                                 <p class="fw-bold small m-0">{{ Carbon::parse($notification->created_at)->format('h:i A') }}</p>
                                             </div>
                                             <div class="row">
                                                 <div class="col">
-                                                    <p class="text-secondary small m-0">{{ $notification->data['message'] }}</p>
+                                                    <p class="text-secondary small m-0">{{ Illuminate\Support\Str::limit($notification->data['message'],55) }}</p>
                                                 </div>
                                             </div>
                                         </div>
@@ -205,7 +195,7 @@ $user = Auth::user();
                     </ul>
                     <ul class="navbar-nav mb-2 mb-lg-0 gap-3">
                         <li class="nav-item">
-                            <a href="#" class="btn btn-primary rounded-pill" style="border: 2px solid #fff">
+                            <a href="{{ route('home') }}" class="btn btn-primary rounded-pill" style="border: 2px solid #fff">
                                 <i class="fa-solid fa-globe mx-1"></i>
                                 Explore Events
                             </a>
@@ -306,13 +296,13 @@ $user = Auth::user();
                                                                         @csrf
                                                                         <input type="file" id="upload-button" name="photo" accept="image/*">
                                                                         <label for="upload-button" class="upload-label">
-                                                                            <i class="fas fa-upload"></i> &nbsp; Upload Photo
+                                                                            <i class="fas fa-upload"></i> &nbsp; Select Photo
                                                                         </label>
                                                                     </div>
                                                                     
                                                                     <div class="modal-footer">
                                                                         <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
-                                                                        <button type="submit" class="btn btn-primary">Save Changes</button>
+                                                                        <button type="submit" class="btn btn-primary">Upload</button>
                                                                     </div>
                                                                 </form>
                                                             </div>

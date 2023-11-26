@@ -64,11 +64,9 @@ class LoginController extends Controller
 
         switch ($user->role) {
             case 'Admin':
-                return redirect()->route('admin.dashboard');
             case 'Co-Admin':
-                return redirect()->route('co_admin.dashboard');
             case 'Organizer':
-                return redirect()->route('organizer.home');
+                return redirect()->route('dashboard');
             case 'User':
                 return redirect()->route('home');
             default:

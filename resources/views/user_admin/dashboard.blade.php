@@ -17,7 +17,7 @@ $user = Auth::user();
         </div>
         <ul class="nav-list">
             <li>
-                <a href="{{ route('admin.dashboard') }}" class="active">
+                <a href="{{ route('dashboard') }}" class="active">
                     <i class="fa-solid fa-gauge"></i>
                     <span class="side-link-name">Home</span>
                 </a>
@@ -42,12 +42,14 @@ $user = Auth::user();
                     <span class="side-link-name">Tasks</span>
                 </a>
             </li> -->
+            @if ($user->role == 'Co-Admin' || $user->role == 'Admin')
             <li>
                 <a href="{{ route('admin.management') }}">
                     <i class="fa-solid fa-toolbox"></i>
                     <span class="side-link-name">Utilities</span>
                 </a>
             </li>
+            @endif
             <li>
                 <a href="{{ route('profile.edit', ['id' => Auth::user()->id]) }}">
                     <i class="fa-solid fa-gear"></i>
@@ -58,7 +60,7 @@ $user = Auth::user();
         <div class="profile-content">
             <div class="profile">
                 <div class="profile-details">
-                    <img src="{{ asset(Auth::user()->profile_picture) }}" alt="">
+                    <img src="@if (Auth::user()->profile_picture == null) {{ asset('asset/blank_profile.jpg') }} @else {{ asset(Auth::user()->profile_picture) }} @endif" alt="">
                     <div class="name-role">
                         <div class="user-name">{{ ucfirst(Auth::user()->username) }}</div>
                         <div class="user-campus">{{ session('campus') }}</div>
@@ -98,11 +100,18 @@ $user = Auth::user();
             </li>
             <div class="d-flex">
                 <li class="nav-item me-2">
+                    @if ( $user->role == "Organizer" )
+                    <button type="button" id="create-event-btn" class="btn px-4 btn-primary rounded-pill mx-1">
+                        <i class="fa-solid me-2 fa-calendar-plus"></i>
+                        Schedule an Event
+                    </button>
+                    @elseif ( $user->role == "Co-Admin" || $user->role == 'Admin')
                     <button type="button" id="create-event-btn" class="btn px-4 btn-primary rounded-pill mx-1">
                         <i class="fa-solid me-2 fa-calendar-plus"></i>
                         Create Event
                     </button>
-                    <a href="#" class="btn btn-primary px-4 rounded-pill mx-1">
+                    @endif
+                    <a href="{{ route('home') }}" class="btn btn-primary px-4 rounded-pill mx-1">
                         <i class="fa-solid fa-globe me-2"></i>
                         Explore Events
                     </a>
@@ -124,18 +133,18 @@ $user = Auth::user();
                                 {{-- Notification Item --}}
                                 <a class="dropdown-item mark-as-read" href="{{ url($notification->data['url']) }}" data-id="{{ $notification->id }}">
                                     <div class="d-flex align-items-center p-2" style="width: 365px">
-                                        <div class="me-4">
+                                        {{-- <div class="me-4">
                                             <!-- icon -->
                                             icon
-                                        </div>
+                                        </div> --}}
                                         <div class="w-100">
                                             <div class="d-flex justify-content-between align-items-center">
-                                                <p class="fw-bold m-0" style="font-size: 16px">{{ $notification->data['title'] }}</p>
+                                                <p class="fw-bold m-0" style="font-size: 16px">{{ Illuminate\Support\Str::limit($notification->data['title'], 30) }}</p>
                                                 <p class="fw-bold small m-0">{{ Carbon::parse($notification->created_at)->format('h:i A') }}</p>
                                             </div>
                                             <div class="row">
                                                 <div class="col">
-                                                    <p class="text-secondary small m-0">{{ $notification->data['message'] }}</p>
+                                                    <p class="text-secondary small m-0">{{ Illuminate\Support\Str::limit($notification->data['message'],55) }}</p>
                                                 </div>
                                             </div>
                                         </div>
@@ -189,7 +198,6 @@ $user = Auth::user();
                         <div class="col">
                             <div class="row">
                                 <div class="col-md-8 mb-3">
-                                    @if ($user->role == 'Admin')
                                     <span class="m-0 text fw-normal">{{ __('Happening Today') }}</span>
                                     <div id="carouselExampleCaptions" class="carousel mt-2 mb-4 slide" data-bs-ride="carousel">
                                         <div class="carousel-indicators">
@@ -217,7 +225,6 @@ $user = Auth::user();
                                             <span class="visually-hidden">Next</span>
                                         </button>
                                     </div>
-                                    @endif
 
                                     <div class="card p-2">
                                         <div class="d-flex justify-content-center align-items-center p-5" id="calendar-event-loader">
@@ -883,13 +890,22 @@ $user = Auth::user();
                             if (response.success) {
                                 $('#calendarModal').modal('hide');
                                 $('#create-event-form')[0].reset();
-                                const newTab = window.open("{{ route('plan', ['eventId' => ':eventId']) }}".replace(':eventId', response.eventId), '_blank');
-        
-                                window.location.reload();
                                 
-                                if (newTab) {
-                                    newTab.focus();
-                                }
+                                @if ($user->role != 'Organizer')
+                                    const newTab = window.open("{{ route('plan', ['eventId' => ':eventId']) }}".replace(':eventId', response.eventId), '_blank');
+                                    window.location.reload();
+                                    if (newTab) {
+                                        newTab.focus();
+                                    }
+                                @else
+                                    Swal.fire({
+                                        title: 'Request Created',
+                                        text: 'Event request sent successfully. Please wait for the confirmation by the admin.',
+                                        icon: 'success',
+                                        confirmButtonColor: '#3085d6',
+                                        confirmButtonText: 'OK'
+                                    });
+                                @endif
                             } else if (response.error){
                                 Swal.fire({
                                     icon: 'error',
@@ -909,18 +925,6 @@ $user = Auth::user();
         });
         
         calendar.render();
-
-        // pending events table
-        $('#myTable').DataTable({
-            "info": false,
-            "searching": false,
-            "lengthChange": false,
-            "paging": false,
-            "ordering": false,
-            "scrollY": "350px",
-            "scrollCollapse": true,
-            "pageLength": 10 
-        });
     });
 </script>
 @endsection
